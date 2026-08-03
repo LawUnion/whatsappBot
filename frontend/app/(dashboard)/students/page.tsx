@@ -283,7 +283,7 @@ export default function StudentsPage() {
     }
 
     // Trigger notification to student
-    await notifyStudent(student.telegram_user_id, "approved", undefined, student.id, student.whatsapp_id);
+    await notifyStudent(student.telegram_user_id, "approved", undefined, student.id, student.whatsapp_id || undefined);
 
     setProcessing(false);
     fetchInitialData();
@@ -349,7 +349,7 @@ export default function StudentsPage() {
       "rejected",
       rejectReason,
       rejectingStudent.id,
-      rejectingStudent.whatsapp_id,
+      rejectingStudent.whatsapp_id || undefined,
     );
 
     setProcessing(false);
