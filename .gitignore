@@ -39,7 +39,7 @@ pnpm-debug.log*
 supabase/.branches/
 supabase/.temp/
 
-# Testing
+# Testings
 coverage/
 .nyc_output/
 
