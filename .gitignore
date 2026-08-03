@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+.npm/
+.supabase/
 
 # Build outputs
 .next/
