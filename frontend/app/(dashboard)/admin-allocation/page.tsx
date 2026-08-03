@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLoader } from "@/contexts/LoaderContext";
 import {
   Select,
   SelectContent,
@@ -88,6 +89,7 @@ export default function AdminAllocationPage() {
     password: string;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showLoader, hideLoader } = useLoader();
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetAdminId, setResetAdminId] = useState<string | null>(null);
@@ -267,6 +269,7 @@ export default function AdminAllocationPage() {
       alert("Please fill in name and email");
       return;
     }
+    showLoader(editingAdmin ? "Updating admin..." : "Creating admin...");
     setIsSubmitting(true);
 
     const payload = {
@@ -289,6 +292,7 @@ export default function AdminAllocationPage() {
       if (updateError) {
         alert("Error updating admin: " + updateError.message);
         setIsSubmitting(false);
+        hideLoader();
         return;
       }
     } else {
@@ -299,6 +303,7 @@ export default function AdminAllocationPage() {
       if (!token) {
         alert("Not authenticated");
         setIsSubmitting(false);
+        hideLoader();
         return;
       }
 
@@ -319,6 +324,7 @@ export default function AdminAllocationPage() {
       if (!response.ok) {
         alert("Error creating admin: " + (result.error || "Unknown error"));
         setIsSubmitting(false);
+        hideLoader();
         return;
       }
 

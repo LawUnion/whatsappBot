@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from 'sonner';
+import { LoaderProvider } from '@/contexts/LoaderContext';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        {children}
-        <Toaster richColors position="bottom-right" />
+        <LoaderProvider>
+          {children}
+          <Toaster richColors position="bottom-right" />
+        </LoaderProvider>
       </body>
     </html>
   );

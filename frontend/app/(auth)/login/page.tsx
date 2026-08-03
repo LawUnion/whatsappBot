@@ -7,19 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useLoader } from '@/contexts/LoaderContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { showLoader, hideLoader } = useLoader();
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    showLoader('Authenticating...');
 
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
@@ -29,6 +30,7 @@ export default function LoginPage() {
 
       if (authError) {
         setError(authError.message);
+        hideLoader();
         return;
       }
 
@@ -36,8 +38,7 @@ export default function LoginPage() {
       router.refresh();
     } catch {
       setError('An unexpected error occurred');
-    } finally {
-      setLoading(false);
+      hideLoader();
     }
   };
 
@@ -102,17 +103,9 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={loading}
               className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold shadow-lg shadow-indigo-500/30 transition-all duration-200"
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In'
-              )}
+              Sign In
             </Button>
           </form>
 

@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLoader } from "@/contexts/LoaderContext";
 import {
   Select,
   SelectContent,
@@ -84,6 +84,7 @@ export default function StudentsPage() {
   );
   const [rejectReason, setRejectReason] = useState("");
   const [processing, setProcessing] = useState(false);
+  const { showLoader, hideLoader } = useLoader();
 
   // Edit modal
   const [showEditModal, setShowEditModal] = useState(false);
@@ -215,6 +216,7 @@ export default function StudentsPage() {
   };
 
   const approveStudent = async (student: Student) => {
+    showLoader("Approving student...");
     setProcessing(true);
 
     // Get current admin
@@ -282,10 +284,10 @@ export default function StudentsPage() {
       }
     }
 
-    // Trigger notification to student
     await notifyStudent(student.telegram_user_id, "approved", undefined, student.id, student.whatsapp_id || undefined);
 
     setProcessing(false);
+    hideLoader();
     fetchInitialData();
   };
 
@@ -298,6 +300,7 @@ export default function StudentsPage() {
   const rejectStudent = async () => {
     if (!rejectingStudent) return;
 
+    showLoader("Rejecting student...");
     setProcessing(true);
 
     // Get current admin
@@ -327,6 +330,7 @@ export default function StudentsPage() {
       if (updateError) {
         alert("Error rejecting student: " + updateError.message);
         setProcessing(false);
+        hideLoader();
         return;
       }
 
@@ -352,7 +356,7 @@ export default function StudentsPage() {
       rejectingStudent.whatsapp_id || undefined,
     );
 
-    setProcessing(false);
+    hideLoader();
     setShowRejectModal(false);
     setRejectingStudent(null);
     fetchInitialData();
@@ -389,8 +393,8 @@ export default function StudentsPage() {
 
   const handleUpdateStudent = async () => {
     if (!editingStudent) return;
-
-    setProcessing(true);
+    
+    showLoader("Saving changes...");
 
     const updateData: any = {
       name: editFormData.name.trim() || null,
@@ -412,13 +416,14 @@ export default function StudentsPage() {
 
     if (error) {
       alert("Error updating student: " + error.message);
-    } else {
-      setShowEditModal(false);
-      setEditingStudent(null);
-      fetchInitialData();
+      hideLoader();
+      return;
     }
 
-    setProcessing(false);
+    hideLoader();
+    setShowEditModal(false);
+    setEditingStudent(null);
+    fetchInitialData();
   };
 
   const handleDeleteStudent = async (student: Student) => {
