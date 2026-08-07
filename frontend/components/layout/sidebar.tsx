@@ -166,23 +166,12 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
 
       fetchCounts();
 
-      const channel = supabase
-        .channel('sidebar_counts')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
-          fetchCounts();
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
-          fetchCounts();
-        })
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Successfully subscribed to realtime counts');
-          }
-        });
+      // We use 2s polling instead of WebSockets because Supabase WebSockets silently drop 
+      // events if the connection is made before the Auth session is fully hydrated by SSR,
+      // or if the browser puts the tab to sleep. Polling is standard for admin dashboards (like React Query/SWR).
+      const interval = setInterval(fetchCounts, 2000);
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => clearInterval(interval);
     });
   }, []);
 
@@ -254,7 +243,7 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
             )}
 
             {section.items.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
               const Icon = item.icon;
               
               // Determine badge count
