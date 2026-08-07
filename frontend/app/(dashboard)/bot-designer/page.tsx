@@ -671,7 +671,34 @@ export default function BotDesignerPage() {
                 .map((btn) => (
                   <div
                     key={btn.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("text/plain", btn.id.toString());
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const sourceId = parseInt(e.dataTransfer.getData("text/plain"));
+                      const targetId = btn.id;
+                      if (sourceId && sourceId !== targetId) {
+                        const sourceBtn = buttons.find((b) => b.id === sourceId);
+                        const targetBtn = buttons.find((b) => b.id === targetId);
+                        if (sourceBtn && targetBtn) {
+                          setButtons(
+                            buttons.map((b) => {
+                              if (b.id === sourceId) return { ...b, row_order: targetBtn.row_order, button_order: targetBtn.button_order };
+                              if (b.id === targetId) return { ...b, row_order: sourceBtn.row_order, button_order: sourceBtn.button_order };
+                              return b;
+                            })
+                          );
+                        }
+                      }
+                    }}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-grab active:cursor-grabbing transition-all ${
                       selectedButton?.id === btn.id
                         ? "border-slate-400 bg-slate-50"
                         : btn.active
@@ -681,23 +708,28 @@ export default function BotDesignerPage() {
                     onClick={() => setSelectedButton(btn)}
                   >
                     <div className="flex items-center gap-3">
+                      <div className="text-slate-300 cursor-grab px-1 hover:text-slate-500">
+                        <span className="text-lg">⋮⋮</span>
+                      </div>
                       <span className="text-xl">{btn.icon}</span>
                       <div>
                         <p className="text-sm font-medium text-slate-700">
                           {btn.label}
                         </p>
                         <p className="text-[10px] text-slate-400">
-                          Row {btn.row_order} • {btn.action_type}
+                          Row {btn.row_order} • Position {btn.button_order}
                         </p>
                       </div>
                     </div>
-                    <Switch
-                      checked={btn.active}
-                      onCheckedChange={(checked) => {
-                        updateButton(btn.id, { active: checked });
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={btn.active}
+                        onCheckedChange={(checked) => {
+                          updateButton(btn.id, { active: checked });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
                   </div>
                 ))}
 
