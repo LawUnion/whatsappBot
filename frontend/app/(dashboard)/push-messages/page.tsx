@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -343,12 +344,12 @@ export default function PushMessagesPage() {
         "image/gif",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert("Please select a PDF or image file");
+        toast.error("Please select a PDF or image file");
         return;
       }
       // Check file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
+        toast.error("File size must be less than 10MB");
         return;
       }
       setSelectedFile(file);
@@ -383,7 +384,7 @@ export default function PushMessagesPage() {
 
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) {
-      alert("Not authenticated");
+      toast.error("Not authenticated");
       setIsSending(false);
       return;
     }
@@ -397,7 +398,7 @@ export default function PushMessagesPage() {
       setUploadingFile(false);
 
       if (!fileUrl) {
-        alert("Failed to upload file. Please try again.");
+        toast.error("Failed to upload file. Please try again.");
         setIsSending(false);
         return;
       }
@@ -433,7 +434,7 @@ export default function PushMessagesPage() {
       .single();
 
     if (error) {
-      alert("Error creating broadcast: " + error.message);
+      toast.error("Error creating broadcast: " + error.message);
       setIsSending(false);
       return;
     }
@@ -446,16 +447,16 @@ export default function PushMessagesPage() {
       );
 
       if (invokeError) {
-        alert(
+        toast.error(
           "Broadcast created but failed to send: " +
             invokeError.message +
             "\nIt will remain in Pending status.",
         );
       } else {
-        alert("Broadcast sent successfully!");
+        toast.success("Broadcast sent successfully!");
       }
     } else {
-      alert("Broadcast scheduled successfully!");
+      toast.success("Broadcast scheduled successfully!");
     }
 
     resetForm();
