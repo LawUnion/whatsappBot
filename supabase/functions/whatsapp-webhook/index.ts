@@ -832,6 +832,7 @@ async function handleModuleClick(fromPhone: string, student: any, button: any) {
         break;
       }
 
+      case "study-materials":
       case "study_materials": {
         const { data: materials } = await supabase
           .from("study_materials")
@@ -918,6 +919,24 @@ async function handleModuleClick(fromPhone: string, student: any, button: any) {
           fromPhone,
           "",
           buildWhatsAppQuickReplies(`💬 *Message Support / Help Desk*\n\nTo send a query to the bot administrators or help desk, simply reply to this chat with your question starting with *Help:* (e.g., _Help: I need assistance with ID card issue_).`, [{ id: "menu", title: "📋 Main Menu" }])
+        );
+        break;
+      }
+
+      case "accommodation": {
+        await sendWhatsAppMessage(
+          fromPhone,
+          "",
+          buildWhatsAppQuickReplies(`🏠 *Accommodation Help*\n\nLooking for PG or Flats? We have a network of verified brokers and seniors.\n\nPlease type *Help: Accommodation* followed by your budget and preferences, and our team will get back to you.`, [{ id: "menu", title: "📋 Main Menu" }])
+        );
+        break;
+      }
+
+      case "seniors": {
+        await sendWhatsAppMessage(
+          fromPhone,
+          "",
+          buildWhatsAppQuickReplies(`🎓 *Seniors Connect Hub*\n\nNeed mentorship or guidance? Our seniors are here to help.\n\nPlease type *Help: Senior Connect* with your specific query (e.g., moots, exams, internships).`, [{ id: "menu", title: "📋 Main Menu" }])
         );
         break;
       }
