@@ -884,6 +884,35 @@ async function handleModuleClick(fromPhone: string, student: any, button: any) {
         break;
       }
 
+      case "internships":
+      case "internship": {
+        const { data: internships } = await supabase
+          .from("internships")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (!internships || internships.length === 0) {
+          await sendWhatsAppMessage(
+            fromPhone,
+            "",
+            buildWhatsAppQuickReplies(`💼 *Internships*\n\nNo active internship opportunities right now.`)
+          );
+          return;
+        }
+
+        const internshipText = internships
+          .map((i) => `💼 *${i.position}*\n🏢 Company: ${i.company_name}\n📅 Deadline: ${i.deadline ? new Date(i.deadline).toLocaleDateString() : "Rolling"}\n🔗 Apply: ${i.apply_url || "Check portal"}`)
+          .join("\n---\n\n");
+
+        await sendWhatsAppMessage(
+          fromPhone,
+          "",
+          buildWhatsAppQuickReplies(`💼 *Latest Internships*\n\n${internshipText}`)
+        );
+        break;
+      }
+
       case "support": {
         await sendWhatsAppMessage(
           fromPhone,
