@@ -46,6 +46,7 @@ bot.command("start", async (ctx) => {
     await ctx.reply("Unable to identify user.");
     return;
   }
+  await ctx.replyWithChatAction("typing").catch(() => {});
 
   // Check if session is blocked
   const { data: currentSession } = await supabase
@@ -193,6 +194,7 @@ bot.command("register", async (ctx) => {
     await ctx.reply("Unable to identify user.");
     return;
   }
+  await ctx.replyWithChatAction("typing").catch(() => {});
 
   // Check if session is blocked
   const { data: currentSession } = await supabase
@@ -285,6 +287,7 @@ bot.on("message:text", async (ctx) => {
   const telegramUserId = ctx.from?.id;
 
   if (!telegramUserId) return;
+  await ctx.replyWithChatAction("typing").catch(() => {});
 
   // Check if user is in registration flow
   const { data: session } = await supabase

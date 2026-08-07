@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -148,6 +148,39 @@ const navSections: NavSection[] = [
 export function Sidebar({ admin, collapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(collapsed);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [supportCount, setSupportCount] = useState(0);
+
+  useEffect(() => {
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+
+      const fetchCounts = async () => {
+        const [{ count: pending }, { count: support }] = await Promise.all([
+          supabase.from("students").select("*", { count: "exact", head: true }).eq("status", "Pending"),
+          supabase.from("support_messages").select("*", { count: "exact", head: true }).eq("read", false)
+        ]);
+        setPendingCount(pending || 0);
+        setSupportCount(support || 0);
+      };
+
+      fetchCounts();
+
+      const channel = supabase
+        .channel('sidebar_counts')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+          fetchCounts();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
+          fetchCounts();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    });
+  }, []);
 
   const getFilteredSections = () => {
     if (!admin) return [];
@@ -216,26 +249,44 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
               <div className="my-3 border-t border-slate-800" />
             )}
 
-            {/* Section Items */}
             {section.items.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
+              
+              // Determine badge count
+              let badgeCount = 0;
+              if (item.title === "Pending Approvals") {
+                badgeCount = pendingCount;
+              } else if (item.title === "Support Inbox") {
+                badgeCount = supportCount;
+              }
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative",
                     isActive
                       ? "bg-slate-800 text-white"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/50",
                   )}
                 >
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 relative">
                     <Icon className="w-5 h-5" />
+                    {isCollapsed && badgeCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900"></span>
+                    )}
                   </div>
                   {!isCollapsed && (
-                    <span className="text-sm font-medium">{item.title}</span>
+                    <div className="flex items-center justify-between flex-1 min-w-0">
+                      <span className="text-sm font-medium truncate">{item.title}</span>
+                      {badgeCount > 0 && (
+                        <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[20px]">
+                          {badgeCount > 99 ? '99+' : badgeCount}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </Link>
               );

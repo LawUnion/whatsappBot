@@ -32,13 +32,15 @@ interface SupportMessage {
     roll_number: string;
     telegram_username: string;
     telegram_user_id: number;
+    whatsapp_id: string;
   } | null;
 }
 
 interface AccommodationRequest {
   id: string;
   student_id: string;
-  telegram_user_id: number;
+  telegram_user_id: number | null;
+  whatsapp_id: string | null;
   message: string | null;
   photo_file_id: string | null;
   video_file_id: string | null;
@@ -76,7 +78,7 @@ function GeneralSupportTab() {
     const { data, error } = await supabase
       .from("support_messages")
       .select(
-        "*, student:students(id, name, roll_number, telegram_username, telegram_user_id)",
+        "*, student:students(id, name, roll_number, telegram_username, telegram_user_id, whatsapp_id)",
       )
       .order("created_at", { ascending: false });
 
@@ -119,6 +121,7 @@ function GeneralSupportTab() {
         {
           body: {
             telegramUserId: selectedMessage.student?.telegram_user_id,
+            whatsappId: selectedMessage.student?.whatsapp_id,
             replyText: replyText.trim(),
             originalMessage: selectedMessage.message.substring(0, 100),
           },
@@ -126,10 +129,14 @@ function GeneralSupportTab() {
       );
 
       if (sendError) {
-        // Fallback: Try direct Telegram link if edge function fails
-        const telegramUrl = `https://t.me/${selectedMessage.student?.telegram_username}`;
-        window.open(telegramUrl, "_blank");
-        toast.info("Opening Telegram to send reply manually");
+        if (selectedMessage.student?.telegram_username) {
+          // Fallback: Try direct Telegram link if edge function fails
+          const telegramUrl = `https://t.me/${selectedMessage.student?.telegram_username}`;
+          window.open(telegramUrl, "_blank");
+          toast.info("Opening Telegram to send reply manually");
+        } else {
+          toast.error("Failed to send WhatsApp reply.");
+        }
       }
 
       // Update the message record with reply
@@ -457,10 +464,11 @@ function AccommodationTab() {
       })
       .eq("id", replyingTo.id);
 
-    // Send reply to student via Telegram
+    // Send reply to student via Telegram or WhatsApp
     await supabase.functions.invoke("send-support-reply", {
       body: {
         telegramUserId: replyingTo.telegram_user_id,
+        whatsappId: replyingTo.whatsapp_id,
         replyText: replyText || "See attached",
         message: `🏠 *Accommodation Help Reply*\n\n${replyText || "See attached"}`,
         photoUrl,
