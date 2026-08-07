@@ -168,7 +168,16 @@ async function processBroadcast(broadcast: Broadcast): Promise<{ success: number
   return { success, failed };
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
     const { broadcast_id, process_scheduled } = await req.json().catch(() => ({}));
 
@@ -180,11 +189,16 @@ Deno.serve(async (req) => {
         .single();
 
       if (error || !broadcast) {
-        return new Response(JSON.stringify({ error: 'Broadcast not found' }), { status: 404 });
+        return new Response(JSON.stringify({ error: 'Broadcast not found' }), { 
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
       }
 
       const result = await processBroadcast(broadcast);
-      return new Response(JSON.stringify({ success: true, ...result }));
+      return new Response(JSON.stringify({ success: true, ...result }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (process_scheduled) {
@@ -197,7 +211,9 @@ Deno.serve(async (req) => {
         .lte('scheduled_at', now);
 
       if (!pendingBroadcasts || pendingBroadcasts.length === 0) {
-        return new Response(JSON.stringify({ message: 'No broadcasts due' }));
+        return new Response(JSON.stringify({ message: 'No broadcasts due' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
       }
 
       const results = [];
@@ -206,12 +222,20 @@ Deno.serve(async (req) => {
         results.push({ id: broadcast.id, ...result });
       }
 
-      return new Response(JSON.stringify({ processed: results.length, results }));
+      return new Response(JSON.stringify({ processed: results.length, results }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    return new Response(JSON.stringify({ error: 'Missing broadcast_id or process_scheduled' }), { status: 400 });
+    return new Response(JSON.stringify({ error: 'Missing broadcast_id or process_scheduled' }), { 
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: String(error) }), { status: 500 });
+    return new Response(JSON.stringify({ error: String(error) }), { 
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
