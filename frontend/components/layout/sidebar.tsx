@@ -274,14 +274,14 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
                 >
                   <div className="flex-shrink-0 relative">
                     <Icon className="w-5 h-5" />
-                    {isCollapsed && badgeCount > 0 && (
+                    {isCollapsed && badgeCount > 0 && !isActive && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900"></span>
                     )}
                   </div>
                   {!isCollapsed && (
                     <div className="flex items-center justify-between flex-1 min-w-0">
                       <span className="text-sm font-medium truncate">{item.title}</span>
-                      {badgeCount > 0 && (
+                      {badgeCount > 0 && !isActive && (
                         <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[20px]">
                           {badgeCount > 99 ? '99+' : badgeCount}
                         </span>
