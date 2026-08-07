@@ -183,7 +183,32 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
       return;
     }
 
-    // If student is sending support or accommodation text, or unknown text, show menu / support
+    // Handle Support / Help queries
+    if (textLower.startsWith("help:") || textLower.startsWith("support:")) {
+      const query = text.substring(text.indexOf(":") + 1).trim();
+      if (query.length > 0) {
+        const { error } = await supabase.from("support_messages").insert({
+          student_id: student.id,
+          message: query,
+        });
+        
+        if (error) {
+          await sendWhatsAppMessage(
+            fromPhone,
+            `❌ *Failed to send query*\n\nThere was an error sending your query. Please try again later.`
+          );
+        } else {
+          await sendWhatsAppMessage(
+            fromPhone,
+            `✅ *Query Sent Successfully*\n\nYour query has been forwarded to the administrators. They will reply to you shortly.`,
+            buildWhatsAppQuickReplies("", [{ id: "menu", title: "📋 Main Menu" }])
+          );
+        }
+        return;
+      }
+    }
+
+    // If student is sending unknown text, show menu
     await showMainMenu(fromPhone, student);
     return;
   }
