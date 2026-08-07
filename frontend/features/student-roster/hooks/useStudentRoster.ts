@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { RosterEntry, College, Year, Section } from "../types";
 
 export function useStudentRoster() {
@@ -143,8 +144,9 @@ export function useStudentRoster() {
       .eq("id", id);
 
     if (error) {
-      alert("Error deleting entry: " + error.message);
+      toast.error("Error deleting entry: " + error.message);
     } else {
+      toast.success("Roster entry deleted");
       fetchRoster();
       fetchMetadata();
     }
@@ -162,7 +164,7 @@ export function useStudentRoster() {
       .eq("roster_id", entry.id);
 
     if (studentError) {
-      alert("Error updating student record: " + studentError.message);
+      toast.error("Error updating student record: " + studentError.message);
       setLoading(false);
       return;
     }
@@ -174,8 +176,9 @@ export function useStudentRoster() {
       .eq("id", entry.id);
 
     if (rosterError) {
-      alert("Error unclaiming roster entry: " + rosterError.message);
+      toast.error("Error unclaiming roster entry: " + rosterError.message);
     } else {
+      toast.success("Roster entry unclaimed successfully");
       fetchRoster();
       fetchMetadata();
     }

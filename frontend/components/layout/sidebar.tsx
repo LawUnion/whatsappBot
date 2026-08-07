@@ -12,10 +12,16 @@ interface SidebarProps {
   onToggle?: () => void;
 }
 
+import { 
+  LayoutDashboard, KeyRound, Bot, Smartphone, ClipboardList, GraduationCap, 
+  CheckSquare, Building2, FolderKanban, Calendar, Megaphone, Building, 
+  BookOpen, Theater, Briefcase, BellRing, Mail, ScrollText, Scale
+} from "lucide-react";
+
 interface NavItem {
   title: string;
   href: string;
-  icon: string;
+  icon: React.ElementType;
   roles?: AdminRole[];
 }
 
@@ -28,26 +34,26 @@ interface NavSection {
 const navSections: NavSection[] = [
   {
     label: "",
-    items: [{ title: "Dashboard", href: "/", icon: "📊" }],
+    items: [{ title: "Dashboard", href: "/", icon: LayoutDashboard }],
   },
   {
     label: "MASTER ADMIN",
     roles: [AdminRole.SUPER_ADMIN],
     items: [
-      { title: "Admin Allocation", href: "/admin-allocation", icon: "🔑" },
-      { title: "Bot Settings", href: "/bot-settings", icon: "🤖" },
-      { title: "Bot Designer", href: "/bot-designer", icon: "📱" },
-      { title: "Student Roster", href: "/student-roster", icon: "📋" },
+      { title: "Admin Allocation", href: "/admin-allocation", icon: KeyRound },
+      { title: "Bot Settings", href: "/bot-settings", icon: Bot },
+      { title: "Bot Designer", href: "/bot-designer", icon: Smartphone },
+      { title: "Student Roster", href: "/student-roster", icon: ClipboardList },
       {
         title: "Pending Approvals",
         href: "/students",
-        icon: "👨‍🎓",
+        icon: GraduationCap,
         roles: [AdminRole.SUPER_ADMIN],
       },
       {
         title: "Content Approvals",
         href: "/content-approvals",
-        icon: "✅",
+        icon: CheckSquare,
         roles: [AdminRole.SUPER_ADMIN],
       },
     ],
@@ -56,8 +62,8 @@ const navSections: NavSection[] = [
     label: "STRUCTURE",
     roles: [AdminRole.SUPER_ADMIN],
     items: [
-      { title: "Academic Structure", href: "/academic-structure", icon: "🏫" },
-      { title: "Content Master", href: "/documents", icon: "📁" },
+      { title: "Academic Structure", href: "/academic-structure", icon: Building2 },
+      { title: "Content Master", href: "/documents", icon: FolderKanban },
     ],
   },
   {
@@ -66,13 +72,13 @@ const navSections: NavSection[] = [
       {
         title: "Class Timetable",
         href: "/class-schedule",
-        icon: "📅",
+        icon: Calendar,
         roles: [AdminRole.SUPER_ADMIN, AdminRole.SECTION_ADMIN],
       },
       {
         title: "Notices",
         href: "/notices",
-        icon: "📢",
+        icon: Megaphone,
         roles: [
           AdminRole.SUPER_ADMIN,
           AdminRole.NOTICES_ADMIN,
@@ -82,13 +88,13 @@ const navSections: NavSection[] = [
       {
         title: "Societies",
         href: "/societies",
-        icon: "🏢",
+        icon: Building,
         roles: [AdminRole.SUPER_ADMIN, AdminRole.SOCIETIES_ADMIN],
       },
       {
         title: "Study Materials",
         href: "/study-materials",
-        icon: "📚",
+        icon: BookOpen,
         roles: [
           AdminRole.SUPER_ADMIN,
           AdminRole.STUDY_MATERIAL_ADMIN,
@@ -98,7 +104,7 @@ const navSections: NavSection[] = [
       {
         title: "Events",
         href: "/events",
-        icon: "🎭",
+        icon: Theater,
         roles: [
           AdminRole.SUPER_ADMIN,
           AdminRole.EVENTS_ADMIN,
@@ -109,7 +115,7 @@ const navSections: NavSection[] = [
       {
         title: "Internships",
         href: "/internships",
-        icon: "💼",
+        icon: Briefcase,
         roles: [AdminRole.SUPER_ADMIN, AdminRole.INTERNSHIP_ADMIN, AdminRole.COLLEGE_CONTENT_ADMIN],
       },
     ],
@@ -120,19 +126,19 @@ const navSections: NavSection[] = [
       {
         title: "Push Broadcast",
         href: "/push-messages",
-        icon: "🔔",
+        icon: BellRing,
         roles: [AdminRole.SUPER_ADMIN],
       },
       {
         title: "Support Inbox",
         href: "/support",
-        icon: "📩",
+        icon: Mail,
         roles: [AdminRole.SUPER_ADMIN],
       },
       {
         title: "Activity Logs",
         href: "/logs",
-        icon: "📜",
+        icon: ScrollText,
         roles: [AdminRole.SUPER_ADMIN],
       },
     ],
@@ -176,8 +182,8 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
       <div className="flex items-center justify-between p-6 border-b border-slate-800">
         {!isCollapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-800 text-white rounded-xl flex items-center justify-center text-xl">
-              ⚖️
+            <div className="w-10 h-10 bg-slate-800 text-white rounded-xl flex items-center justify-center">
+              <Scale className="w-5 h-5" />
             </div>
             <div>
               <h1 className="font-bold text-white tracking-tight">LawAdmin</h1>
@@ -213,6 +219,7 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
             {/* Section Items */}
             {section.items.map((item) => {
               const isActive = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -224,7 +231,9 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
                       : "text-slate-400 hover:text-white hover:bg-slate-800/50",
                   )}
                 >
-                  <span className="text-lg flex-shrink-0">{item.icon}</span>
+                  <div className="flex-shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
                   {!isCollapsed && (
                     <span className="text-sm font-medium">{item.title}</span>
                   )}

@@ -8,6 +8,8 @@ import { StudentTable } from "@/features/students/components/StudentTable";
 import { StudentFilters } from "@/features/students/components/StudentFilters";
 import { StudentModals } from "@/features/students/components/StudentModals";
 import { Student } from "@/features/students/types";
+import { Users, Hourglass, CheckCircle2, XCircle, Download } from "lucide-react";
+import { toast } from "sonner";
 
 export default function StudentsPage() {
   const {
@@ -86,7 +88,7 @@ export default function StudentsPage() {
         .eq("id", student.id);
 
       if (updateError) {
-        alert("Error approving student: " + updateError.message);
+        toast.error("Error approving student: " + updateError.message);
         setProcessing(false);
         hideLoader();
         return;
@@ -94,6 +96,7 @@ export default function StudentsPage() {
     }
 
     notifyStudent(student.telegram_user_id, "approved", undefined, student.id, student.whatsapp_id || undefined);
+    toast.success(`${student.name || "Student"} approved successfully`);
     fetchInitialData();
     setProcessing(false);
     hideLoader();
@@ -123,9 +126,10 @@ export default function StudentsPage() {
       .eq("id", rejectingStudent.id);
 
     if (error) {
-      alert("Error rejecting student: " + error.message);
+      toast.error("Error rejecting student: " + error.message);
     } else {
       notifyStudent(rejectingStudent.telegram_user_id, "rejected", rejectReason, rejectingStudent.id, rejectingStudent.whatsapp_id || undefined);
+      toast.success("Student rejected");
       fetchInitialData();
       setShowRejectModal(false);
     }
@@ -145,8 +149,9 @@ export default function StudentsPage() {
       .eq("id", id);
 
     if (error) {
-      alert("Error updating status: " + error.message);
+      toast.error("Error updating status: " + error.message);
     } else {
+      toast.success(`Status changed to ${newStatus}`);
       fetchInitialData();
     }
     setProcessing(false);
@@ -186,8 +191,9 @@ export default function StudentsPage() {
       .eq("id", editingStudent.id);
 
     if (error) {
-      alert("Error updating student: " + error.message);
+      toast.error("Error updating student: " + error.message);
     } else {
+      toast.success("Student updated successfully");
       fetchInitialData();
       setShowEditModal(false);
     }
@@ -214,8 +220,9 @@ export default function StudentsPage() {
       .eq("id", student.id);
 
     if (error) {
-      alert("Error deleting student: " + error.message);
+      toast.error("Error deleting student: " + error.message);
     } else {
+      toast.success("Student deleted");
       fetchInitialData();
     }
     setProcessing(false);
@@ -245,15 +252,17 @@ export default function StudentsPage() {
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Student Approvals</h1>
           <p className="text-sm text-slate-500 mt-1">Review and manage student registrations</p>
         </div>
-        <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl">
-          📥 Export CSV
+        <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl gap-2">
+          <Download className="w-4 h-4" /> Export CSV
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-slate-200 shadow-sm bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 text-xl">👥</div>
+            <div className="w-12 h-12 bg-indigo-50/50 rounded-2xl flex items-center justify-center text-indigo-500">
+              <Users className="w-6 h-6" />
+            </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{total}</p>
               <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">Total</p>
@@ -262,7 +271,9 @@ export default function StudentsPage() {
         </Card>
         <Card className={`border-slate-200 shadow-sm rounded-3xl ${pending > 0 ? "bg-amber-50/50 border-amber-200" : "bg-white"}`}>
           <CardContent className="p-5 flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${pending > 0 ? "bg-amber-100 text-amber-600" : "bg-slate-50 text-slate-500"}`}>⏳</div>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${pending > 0 ? "bg-amber-100 text-amber-600" : "bg-slate-50 text-slate-400"}`}>
+              <Hourglass className="w-6 h-6" />
+            </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{pending}</p>
               <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">Pending</p>
@@ -271,7 +282,9 @@ export default function StudentsPage() {
         </Card>
         <Card className="border-slate-200 shadow-sm bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 text-xl">✅</div>
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{active}</p>
               <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">Active</p>
@@ -280,7 +293,9 @@ export default function StudentsPage() {
         </Card>
         <Card className="border-slate-200 shadow-sm bg-white rounded-3xl">
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 text-xl">🚫</div>
+            <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500">
+              <XCircle className="w-6 h-6" />
+            </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{blocked}</p>
               <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">Blocked/Rejected</p>

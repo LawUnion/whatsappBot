@@ -2,6 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdminRole } from "@/lib/types";
+import { 
+  Users, 
+  KeyRound, 
+  Megaphone, 
+  Briefcase, 
+  Pin, 
+  CalendarDays, 
+  Bot, 
+  Database, 
+  Activity,
+  Building2,
+  LayoutDashboard
+} from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -54,25 +67,25 @@ export default async function DashboardPage() {
         {
           title: "Total Students",
           value: studentCount || 0,
-          icon: "👥",
+          icon: <Users className="w-5 h-5 text-indigo-500" />,
           color: "indigo",
         },
         {
           title: "Active Admins",
           value: adminCount || 0,
-          icon: "🔑",
+          icon: <KeyRound className="w-5 h-5 text-emerald-500" />,
           color: "emerald",
         },
         {
           title: "Broadcasts Sent",
           value: broadcastCount || 0,
-          icon: "📢",
+          icon: <Megaphone className="w-5 h-5 text-amber-500" />,
           color: "amber",
         },
         {
           title: "Internships",
           value: internshipCount || 0,
-          icon: "💼",
+          icon: <Briefcase className="w-5 h-5 text-rose-500" />,
           color: "rose",
         },
       ]
@@ -80,25 +93,25 @@ export default async function DashboardPage() {
         {
           title: "Students in Scope",
           value: studentCount || 0,
-          icon: "👥",
+          icon: <Users className="w-5 h-5 text-indigo-500" />,
           color: "indigo",
         },
         {
           title: "Active Notices",
           value: noticeCount || 0,
-          icon: "📌",
+          icon: <Pin className="w-5 h-5 text-emerald-500" />,
           color: "emerald",
         },
         {
           title: "Upcoming Events",
           value: eventCount || 0,
-          icon: "🎭",
+          icon: <CalendarDays className="w-5 h-5 text-amber-500" />,
           color: "amber",
         },
         {
           title: "Internships",
           value: internshipCount || 0,
-          icon: "💼",
+          icon: <Briefcase className="w-5 h-5 text-rose-500" />,
           color: "rose",
         },
       ];
@@ -108,17 +121,19 @@ export default async function DashboardPage() {
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-            {isSuperAdmin ? "🏛️ Master Dashboard" : "Dashboard"}
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+            <LayoutDashboard className="w-6 h-6 text-slate-700" />
+            {isSuperAdmin ? "Master Dashboard" : "Dashboard"}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1 ml-8">
             {isSuperAdmin
               ? "Complete oversight of Faculty of Law operations"
               : "Overview of your scope"}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-slate-500 flex items-center gap-1.5">
+            <Building2 className="w-4 h-4" />
             {admin?.college?.name || "All Colleges"}
           </span>
           <Badge
@@ -142,9 +157,9 @@ export default async function DashboardPage() {
                 <span className="text-slate-500 text-sm font-medium">
                   {stat.title}
                 </span>
-                <span className="text-slate-400 text-lg opacity-50">
+                <div className={`p-2 rounded-lg bg-${stat.color}-50`}>
                   {stat.icon}
-                </span>
+                </div>
               </div>
               <p className="text-3xl font-semibold text-slate-900 tracking-tight">
                 {stat.value.toLocaleString()}
@@ -168,7 +183,9 @@ export default async function DashboardPage() {
               {/* Bot Status */}
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">🤖</span>
+                  <div className="p-2 bg-indigo-500/20 rounded-lg">
+                    <Bot className="w-5 h-5 text-indigo-400" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Bot Status</p>
                     <p className="text-xs text-slate-400">Telegram Webhook</p>
@@ -185,7 +202,9 @@ export default async function DashboardPage() {
               {/* Storage */}
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">💾</span>
+                  <div className="p-2 bg-emerald-500/20 rounded-lg">
+                    <Database className="w-5 h-5 text-emerald-400" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Storage Used</p>
                     <p className="text-xs text-slate-400">Supabase Storage</p>
@@ -205,7 +224,9 @@ export default async function DashboardPage() {
               {/* Active Users */}
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">👥</span>
+                  <div className="p-2 bg-rose-500/20 rounded-lg">
+                    <Activity className="w-5 h-5 text-rose-400" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Active Today</p>
                     <p className="text-xs text-slate-400">Bot interactions</p>

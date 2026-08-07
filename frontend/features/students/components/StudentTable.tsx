@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Ghost, Check, X, Ban, CheckCircle2, Pencil, Trash2 } from "lucide-react";
 
 interface StudentTableProps {
   students: Student[];
@@ -80,7 +81,9 @@ export function StudentTable({
             <TableRow>
               <TableCell colSpan={10} className="text-center py-12 text-slate-500">
                 <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-xl">👻</div>
+                  <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                    <Ghost className="w-6 h-6" />
+                  </div>
                   <p>{activeTab === "pending" ? "No pending approvals" : "No students found"}</p>
                 </div>
               </TableCell>
@@ -124,18 +127,18 @@ export function StudentTable({
                   <div className="flex justify-end gap-1">
                     {student.status === "Pending" ? (
                       <>
-                        <Button variant="ghost" size="sm" onClick={() => onApprove(student)} disabled={processing} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">✓ Approve</Button>
-                        <Button variant="ghost" size="sm" onClick={() => onReject(student)} disabled={processing} className="text-red-600 hover:text-red-700 hover:bg-red-50">✗ Reject</Button>
+                        <Button variant="ghost" size="sm" onClick={() => onApprove(student)} disabled={processing} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 gap-1.5"><Check className="w-4 h-4" /> Approve</Button>
+                        <Button variant="ghost" size="sm" onClick={() => onReject(student)} disabled={processing} className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5"><X className="w-4 h-4" /> Reject</Button>
                       </>
                     ) : student.status === "Active" || student.status === "Blocked" ? (
-                      <Button variant="ghost" size="sm" onClick={() => onToggleStatus(student.id, student.status)} className={student.status === "Active" ? "text-slate-400 hover:text-red-600" : "text-slate-400 hover:text-emerald-600"}>
-                        {student.status === "Active" ? "🚫 Block" : "✅ Unblock"}
+                      <Button variant="ghost" size="sm" onClick={() => onToggleStatus(student.id, student.status)} className={`gap-1.5 ${student.status === "Active" ? "text-slate-400 hover:text-red-600" : "text-slate-400 hover:text-emerald-600"}`}>
+                        {student.status === "Active" ? <><Ban className="w-4 h-4" /> Block</> : <><CheckCircle2 className="w-4 h-4" /> Unblock</>}
                       </Button>
                     ) : (
                       <span className="text-xs text-slate-400">{student.rejection_reason ? `Reason: ${student.rejection_reason.substring(0, 20)}...` : "Rejected"}</span>
                     )}
-                    <Button variant="ghost" size="sm" onClick={() => onEdit(student)} disabled={processing} className="text-slate-400 hover:text-slate-600">✏️</Button>
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(student)} disabled={processing} className="text-slate-400 hover:text-red-600">🗑️</Button>
+                    <Button variant="ghost" size="sm" onClick={() => onEdit(student)} disabled={processing} className="text-slate-400 hover:text-slate-600"><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => onDelete(student)} disabled={processing} className="text-slate-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </TableCell>
               </TableRow>

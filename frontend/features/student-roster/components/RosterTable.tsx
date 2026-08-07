@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link2Off, Pencil, Trash2 } from "lucide-react";
 import { RosterEntry } from "../types";
 
 interface RosterTableProps {
@@ -124,10 +125,10 @@ export function RosterTable({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleUnclaim(entry)}
-                    className="text-slate-400 hover:text-amber-600"
+                    className="text-slate-400 hover:text-amber-600 gap-1.5"
                     title="Unlink claimed record"
                   >
-                    🔗 Unlink
+                    <Link2Off className="w-4 h-4" /> Unlink
                   </Button>
                 ) : (
                   <>
@@ -138,7 +139,7 @@ export function RosterTable({
                       className="text-slate-400 hover:text-slate-600"
                       title="Edit"
                     >
-                      ✏️
+                      <Pencil className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -147,7 +148,7 @@ export function RosterTable({
                       className="text-slate-400 hover:text-red-600"
                       title="Delete"
                     >
-                      🗑️
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </>
                 )}
