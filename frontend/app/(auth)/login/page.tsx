@@ -59,9 +59,9 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-bold text-slate-900">
               Law Faculty Admin
             </CardTitle>
-            <CardDescription className="text-slate-500 mt-2">
+            {/* <CardDescription className="text-slate-500 mt-2">
               Sign in to manage your Telegram bot
-            </CardDescription>
+            </CardDescription> */}
           </div>
         </CardHeader>
 
