@@ -662,6 +662,7 @@ export default function StudentRosterPage() {
                 <TableHead>Year</TableHead>
                 <TableHead>Section</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -719,6 +720,9 @@ export default function StudentRosterPage() {
                     </TableCell>
                     <TableCell className="text-slate-500 text-sm">
                       {entry.email || "-"}
+                    </TableCell>
+                    <TableCell className="text-slate-500 text-sm">
+                      {entry.phone || "-"}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -993,6 +997,7 @@ export default function StudentRosterPage() {
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
