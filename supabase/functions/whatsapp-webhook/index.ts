@@ -126,23 +126,18 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
     return;
   }
 
-  // Check if student exists in database
-  const { data: studentBasic } = await supabase
-    .from("students")
-    .select("id, status, name, roll_number, college_id, section_id, roster_id")
-    .eq("whatsapp_id", fromPhone)
-    .maybeSingle();
-
-  let student = studentBasic;
-  if (studentBasic) {
-    const { data: studentFull } = await supabase
+  // Fetch student and bot buttons in parallel to save DB roundtrips (reduces 3-4s delay)
+  const [
+    { data: student },
+    { data: buttons }
+  ] = await Promise.all([
+    supabase
       .from("students")
       .select("*, college:colleges(name), section:sections(name), roster:student_roster(section_name)")
-      .eq("id", studentBasic.id)
-      .single();
-
-    if (studentFull) student = studentFull;
-  }
+      .eq("whatsapp_id", fromPhone)
+      .maybeSingle(),
+    supabase.from("bot_buttons").select("*").eq("active", true)
+  ]);
 
   // Handle Registered Students
   if (student) {
@@ -177,7 +172,6 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
     }
 
     // Check if text matches a bot button label/icon
-    const { data: buttons } = await supabase.from("bot_buttons").select("*").eq("active", true);
     const button = buttons?.find(
       (btn) =>
         btn.label.toLowerCase() === textLower ||
