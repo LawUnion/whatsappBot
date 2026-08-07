@@ -133,7 +133,7 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
   ] = await Promise.all([
     supabase
       .from("students")
-      .select("*, college:colleges(name), section:sections(name), roster:student_roster(section_name)")
+      .select("*, college:colleges(name), section:sections(name), roster:student_roster!roster_id(section_name)")
       .eq("whatsapp_id", fromPhone)
       .maybeSingle(),
     supabase.from("bot_buttons").select("*").eq("active", true)
