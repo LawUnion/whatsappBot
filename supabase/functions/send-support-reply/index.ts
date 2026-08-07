@@ -69,20 +69,18 @@ Deno.serve(async (req) => {
     const waToken = settings?.whatsapp_access_token || Deno.env.get('WHATSAPP_ACCESS_TOKEN');
 
     // Compose message
-    let composedMessage = '\u{1F4AC} <b>Support Reply</b>\n\n';
-    let waComposedMessage = '💬 *Support Reply*\n\n';
+    let composedMessage = '';
+    let waComposedMessage = '';
 
-    if (originalMessage) {
-      composedMessage += `<i>Re: "${originalMessage.substring(0, 50)}${originalMessage.length > 50 ? '...' : ''}"</i>\n\n`;
-      waComposedMessage += `_Re: "${originalMessage.substring(0, 50)}${originalMessage.length > 50 ? '...' : ''}"_\n\n`;
+    if (message && !replyText) {
+      // It's a pre-formatted message (like Accommodation)
+      composedMessage = message;
+      waComposedMessage = message;
+    } else {
+      // General support reply
+      composedMessage = `👨‍💼 <b>Message from Admin</b>\n\n${textContent}`;
+      waComposedMessage = `👨‍💼 *Message from Admin*\n\n${textContent}`;
     }
-
-    if (textContent) {
-      composedMessage += textContent;
-      waComposedMessage += textContent;
-    }
-    composedMessage += '\n\n<i>- Admin Team</i>';
-    waComposedMessage += '\n\n_- Admin Team_';
 
     let telegramSuccess = false;
     let whatsappSuccess = false;

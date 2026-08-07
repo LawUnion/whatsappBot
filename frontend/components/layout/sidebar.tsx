@@ -166,19 +166,10 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
 
       fetchCounts();
 
-      const channel = supabase
-        .channel('sidebar_counts')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
-          fetchCounts();
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
-          fetchCounts();
-        })
-        .subscribe();
+      // Poll every 5 seconds since Realtime sockets can be blocked by RLS for anon connections
+      const interval = setInterval(fetchCounts, 5000);
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => clearInterval(interval);
     });
   }, []);
 
