@@ -60,6 +60,10 @@ export default function StudentRosterPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importData, setImportData] = useState<any[]>([]);
   const [importing, setImporting] = useState(false);
+  
+  const [importCollegeId, setImportCollegeId] = useState("");
+  const [importYearId, setImportYearId] = useState("");
+  const [importSectionId, setImportSectionId] = useState("");
 
   const openAddModal = () => {
     setEditingEntry(null);
@@ -187,6 +191,9 @@ export default function StudentRosterPage() {
       }
 
       setImportData(data);
+      setImportCollegeId("");
+      setImportYearId("");
+      setImportSectionId("");
       setShowImportModal(true);
     };
 
@@ -202,8 +209,8 @@ export default function StudentRosterPage() {
     setImporting(true);
 
     const dataToInsert = importData.map((row) => {
-      let college_id = null;
-      if (row.college_code) {
+      let college_id = importCollegeId ? parseInt(importCollegeId) : null;
+      if (!college_id && row.college_code) {
         const college = colleges.find(
           (c) =>
             c.code.toLowerCase() === row.college_code.toLowerCase() ||
@@ -218,6 +225,8 @@ export default function StudentRosterPage() {
         email: row.email,
         phone: row.phone,
         college_id,
+        year_id: importYearId ? parseInt(importYearId) : null,
+        section_id: importSectionId ? parseInt(importSectionId) : null,
       };
     });
 
@@ -419,6 +428,12 @@ export default function StudentRosterPage() {
         setImportData={setImportData}
         handleImport={handleImport}
         importing={importing}
+        importCollegeId={importCollegeId}
+        setImportCollegeId={setImportCollegeId}
+        importYearId={importYearId}
+        setImportYearId={setImportYearId}
+        importSectionId={importSectionId}
+        setImportSectionId={setImportSectionId}
       />
     </div>
   );

@@ -42,6 +42,12 @@ interface RosterModalsProps {
   setImportData: (data: any[]) => void;
   handleImport: () => void;
   importing: boolean;
+  importCollegeId: string;
+  setImportCollegeId: (id: string) => void;
+  importYearId: string;
+  setImportYearId: (id: string) => void;
+  importSectionId: string;
+  setImportSectionId: (id: string) => void;
 }
 
 export function RosterModals({
@@ -61,10 +67,20 @@ export function RosterModals({
   setImportData,
   handleImport,
   importing,
+  importCollegeId,
+  setImportCollegeId,
+  importYearId,
+  setImportYearId,
+  importSectionId,
+  setImportSectionId,
 }: RosterModalsProps) {
-  const filteredYears = formData.college_id
-    ? years.filter((y) => y.college_id === parseInt(formData.college_id))
-    : [];
+  const filteredYears = years.filter(
+    (y) => y.college_id.toString() === formData.college_id,
+  );
+  
+  const filteredImportYears = years.filter(
+    (y) => y.college_id.toString() === importCollegeId,
+  );
 
   return (
     <>
@@ -224,8 +240,77 @@ export function RosterModals({
           <DialogHeader>
             <DialogTitle>Import Preview</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="py-4 space-y-4">
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <h4 className="text-sm font-medium text-slate-800 mb-3">Optional: Assign all imported students to:</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>College</Label>
+                  <Select
+                    value={importCollegeId}
+                    onValueChange={(v) => {
+                      setImportCollegeId(v);
+                      setImportYearId("");
+                      setImportSectionId("");
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colleges.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Year</Label>
+                  <Select
+                    value={importYearId}
+                    onValueChange={(v) => {
+                      setImportYearId(v);
+                      setImportSectionId("");
+                    }}
+                    disabled={!importCollegeId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredImportYears.map((y) => (
+                        <SelectItem key={y.id} value={y.id.toString()}>
+                          {y.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Section</Label>
+                  <Select
+                    value={importSectionId}
+                    onValueChange={(v) => setImportSectionId(v)}
+                    disabled={!importYearId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sections.map((s) => (
+                        <SelectItem key={s.id} value={s.id.toString()}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-sm text-slate-600">
               Found {importData.length} entries to import. Review the data
               below:
             </p>
