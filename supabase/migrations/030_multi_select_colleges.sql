@@ -72,7 +72,7 @@ CREATE POLICY "Admins can view notices in scope" ON notices FOR SELECT TO authen
 );
 CREATE POLICY "Notices admins can create notices" ON notices FOR INSERT TO authenticated WITH CHECK (
   EXISTS (
-    SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND a.id = created_by AND (
+    SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND a.id = posted_by AND (
       a.role = 'SUPER_ADMIN' OR a.role = 'NOTICES_ADMIN' OR
       (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(notices.target_colleges))
     )
@@ -81,7 +81,7 @@ CREATE POLICY "Notices admins can create notices" ON notices FOR INSERT TO authe
 CREATE POLICY "Notices admins can update notices" ON notices FOR UPDATE TO authenticated USING (
   EXISTS (
     SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND (
-      a.role = 'SUPER_ADMIN' OR a.role = 'NOTICES_ADMIN' OR (created_by = auth.uid()) OR
+      a.role = 'SUPER_ADMIN' OR a.role = 'NOTICES_ADMIN' OR (posted_by = auth.uid()) OR
       (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(notices.target_colleges))
     )
   )
@@ -89,7 +89,7 @@ CREATE POLICY "Notices admins can update notices" ON notices FOR UPDATE TO authe
 CREATE POLICY "Notices admins can delete notices" ON notices FOR DELETE TO authenticated USING (
   EXISTS (
     SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND (
-      a.role = 'SUPER_ADMIN' OR a.role = 'NOTICES_ADMIN' OR (created_by = auth.uid()) OR
+      a.role = 'SUPER_ADMIN' OR a.role = 'NOTICES_ADMIN' OR (posted_by = auth.uid()) OR
       (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(notices.target_colleges))
     )
   )
