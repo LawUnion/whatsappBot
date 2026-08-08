@@ -1,5 +1,10 @@
 -- Migration 030: Replace single college_id with target_colleges array for Notices, Events, and Study Materials
 
+-- 0. DROP POLICIES THAT DEPEND ON college_id
+DROP POLICY IF EXISTS "Admins can view notices in scope" ON notices;
+DROP POLICY IF EXISTS "Admins can view events in scope" ON events;
+DROP POLICY IF EXISTS "Admins can view study materials in scope" ON study_materials;
+
 -- 1. NOTICES
 ALTER TABLE notices ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 
@@ -35,3 +40,57 @@ ALTER TABLE study_materials DROP COLUMN IF EXISTS college_id;
 CREATE INDEX IF NOT EXISTS idx_notices_target_colleges ON notices USING GIN(target_colleges);
 CREATE INDEX IF NOT EXISTS idx_events_target_colleges ON events USING GIN(target_colleges);
 CREATE INDEX IF NOT EXISTS idx_study_materials_target_colleges ON study_materials USING GIN(target_colleges);
+
+
+-- 5. RECREATE POLICIES USING target_colleges
+
+-- Admins can view notices in their scope
+CREATE POLICY "Admins can view notices in scope"
+ON notices FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM admins a
+    WHERE a.id = auth.uid() AND a.active = TRUE
+    AND (
+      a.role = 'SUPER_ADMIN' OR
+      a.role = 'NOTICES_ADMIN' OR
+      (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(notices.target_colleges)) OR
+      (a.role = 'SECTION_ADMIN' AND a.section_id = notices.section_id)
+    )
+  )
+);
+
+-- Admins can view events in their scope
+CREATE POLICY "Admins can view events in scope"
+ON events FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM admins a
+    WHERE a.id = auth.uid() AND a.active = TRUE
+    AND (
+      a.role = 'SUPER_ADMIN' OR
+      a.role = 'EVENTS_ADMIN' OR
+      (a.role = 'SOCIETIES_ADMIN' AND a.society_id = events.society_id) OR
+      (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(events.target_colleges))
+    )
+  )
+);
+
+-- Admins can view study materials in their scope
+CREATE POLICY "Admins can view study materials in scope"
+ON study_materials FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM admins a
+    WHERE a.id = auth.uid() AND a.active = TRUE
+    AND (
+      a.role = 'SUPER_ADMIN' OR
+      a.role = 'STUDY_MATERIAL_ADMIN' OR
+      (a.role = 'COLLEGE_CONTENT_ADMIN' AND a.college_id = ANY(study_materials.target_colleges)) OR
+      (a.role = 'SECTION_ADMIN' AND a.section_id = study_materials.section_id)
+    )
+  )
+);
