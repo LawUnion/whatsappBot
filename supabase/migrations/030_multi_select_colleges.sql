@@ -7,7 +7,7 @@ ALTER TABLE notices ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 UPDATE notices SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL;
 
 -- Drop college_id
-ALTER TABLE notices DROP COLUMN IF NOT EXISTS college_id;
+ALTER TABLE notices DROP COLUMN IF EXISTS college_id;
 
 
 -- 2. EVENTS
@@ -17,7 +17,7 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 UPDATE events SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL;
 
 -- Drop college_id
-ALTER TABLE events DROP COLUMN IF NOT EXISTS college_id;
+ALTER TABLE events DROP COLUMN IF EXISTS college_id;
 
 
 -- 3. STUDY MATERIALS
@@ -28,7 +28,7 @@ ALTER TABLE study_materials ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 UPDATE study_materials SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL AND (target_colleges IS NULL OR array_length(target_colleges, 1) = 0);
 
 -- Drop college_id
-ALTER TABLE study_materials DROP COLUMN IF NOT EXISTS college_id;
+ALTER TABLE study_materials DROP COLUMN IF EXISTS college_id;
 
 -- 4. Recreate Indexes (Optional but good practice)
 -- Postgres uses GIN index for arrays
