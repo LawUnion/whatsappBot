@@ -98,8 +98,13 @@ export default function StudentRosterPage() {
   };
 
   const handleSave = async () => {
-    if (!formData.roll_number || !formData.name) {
-      alert("Roll number and name are required");
+    if (!formData.name) {
+      alert("Name is required");
+      return;
+    }
+    
+    if (!formData.roll_number && !formData.form_number) {
+      alert("Either Roll Number or Form Number is required");
       return;
     }
 
@@ -107,7 +112,7 @@ export default function StudentRosterPage() {
 
     const data = {
       form_number: formData.form_number.trim().toUpperCase() || null,
-      roll_number: formData.roll_number.trim().toUpperCase(),
+      roll_number: formData.roll_number.trim().toUpperCase() || null,
       name: formData.name.trim(),
       college_id: formData.college_id ? parseInt(formData.college_id) : null,
       year_id: formData.year_id ? parseInt(formData.year_id) : null,
@@ -163,13 +168,18 @@ export default function StudentRosterPage() {
       }
 
       const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
-      const requiredHeaders = ["roll_number", "name"];
+      const requiredHeaders = ["name"];
 
       for (const required of requiredHeaders) {
         if (!headers.includes(required)) {
           alert(`CSV must have a "${required}" column`);
           return;
         }
+      }
+
+      if (!headers.includes("form_number") && !headers.includes("roll_number")) {
+        alert("CSV must have either a 'form_number' or 'roll_number' column");
+        return;
       }
 
       const data = [];
@@ -181,10 +191,10 @@ export default function StudentRosterPage() {
           row[header] = values[idx] || "";
         });
 
-        if (row.roll_number && row.name) {
+        if ((row.roll_number || row.form_number) && row.name) {
           data.push({
             form_number: row.form_number ? row.form_number.toUpperCase() : null,
-            roll_number: row.roll_number.toUpperCase(),
+            roll_number: row.roll_number ? row.roll_number.toUpperCase() : null,
             name: row.name,
             email: row.email || null,
             phone: row.phone || null,
@@ -246,9 +256,11 @@ export default function StudentRosterPage() {
       };
     });
 
+    const onConflictCol = importData[0]?.form_number ? "form_number" : "roll_number";
+
     const { error } = await supabase
       .from("student_roster")
-      .upsert(dataToInsert, { onConflict: "roll_number" });
+      .upsert(dataToInsert, { onConflict: onConflictCol });
 
     if (error) {
       alert("Error importing data: " + error.message);

@@ -112,7 +112,7 @@ export function RosterModals({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="roll_number">Roll Number *</Label>
+                <Label htmlFor="roll_number">Roll Number</Label>
                 <Input
                   id="roll_number"
                   value={formData.roll_number}
