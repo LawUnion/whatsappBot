@@ -13,12 +13,14 @@ import { createClient } from "@/lib/supabase/client";
 export default function StudentRosterPage() {
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importSemesterId, setImportSemesterId] = useState("");
 
   const {
     roster,
     loading,
     colleges,
     years,
+    semesters,
     sections,
     currentPage,
     setCurrentPage,
@@ -195,7 +197,7 @@ export default function StudentRosterPage() {
       setImportData(data);
       setImportCollegeId("");
       setImportYearId("");
-      setImportSectionId("");
+      setImportSemesterId("");
       setShowImportModal(true);
     };
 
@@ -221,6 +223,16 @@ export default function StudentRosterPage() {
         if (college) college_id = college.id;
       }
 
+      let section_id = null;
+      if (importSemesterId && row.section_name) {
+        const matchedSection = sections.find(
+          (s) =>
+            s.semester_id.toString() === importSemesterId &&
+            s.name.toUpperCase() === row.section_name.toUpperCase()
+        );
+        if (matchedSection) section_id = matchedSection.id;
+      }
+
       return {
         form_number: row.form_number,
         roll_number: row.roll_number,
@@ -229,7 +241,7 @@ export default function StudentRosterPage() {
         phone: row.phone,
         college_id,
         year_id: importYearId ? parseInt(importYearId) : null,
-        section_id: importSectionId ? parseInt(importSectionId) : null,
+        section_id: section_id,
         section_name: row.section_name ? row.section_name.toUpperCase() : null,
       };
     });
@@ -425,6 +437,7 @@ export default function StudentRosterPage() {
         saving={saving}
         colleges={colleges}
         years={years}
+        semesters={semesters}
         sections={sections}
         showImportModal={showImportModal}
         setShowImportModal={setShowImportModal}
@@ -436,6 +449,8 @@ export default function StudentRosterPage() {
         setImportCollegeId={setImportCollegeId}
         importYearId={importYearId}
         setImportYearId={setImportYearId}
+        importSemesterId={importSemesterId}
+        setImportSemesterId={setImportSemesterId}
         importSectionId={importSectionId}
         setImportSectionId={setImportSectionId}
       />

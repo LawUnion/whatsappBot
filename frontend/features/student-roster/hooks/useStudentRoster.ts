@@ -10,6 +10,7 @@ export function useStudentRoster() {
   const [loading, setLoading] = useState(true);
   const [colleges, setColleges] = useState<College[]>([]);
   const [years, setYears] = useState<Year[]>([]);
+  const [semesters, setSemesters] = useState<any[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
 
   // Pagination
@@ -67,10 +68,11 @@ export function useStudentRoster() {
   ]);
 
   const fetchMetadata = async () => {
-    const [collegesRes, yearsRes, sectionsRes, totalRes, claimedRes] =
+    const [collegesRes, yearsRes, semestersRes, sectionsRes, totalRes, claimedRes] =
       await Promise.all([
         supabase.from("colleges").select("*"),
         supabase.from("years").select("*"),
+        supabase.from("semesters").select("*"),
         supabase.from("sections").select("*"),
         supabase
           .from("student_roster")
@@ -83,6 +85,7 @@ export function useStudentRoster() {
 
     if (collegesRes.data) setColleges(collegesRes.data);
     if (yearsRes.data) setYears(yearsRes.data);
+    if (semestersRes.data) setSemesters(semestersRes.data);
     if (sectionsRes.data) setSections(sectionsRes.data);
     if (totalRes.count !== null) setTotalCount(totalRes.count);
     if (claimedRes.count !== null) setClaimedCount(claimedRes.count);
@@ -211,5 +214,6 @@ export function useStudentRoster() {
     fetchMetadata,
     handleDelete,
     handleUnclaim,
+    semesters,
   };
 }

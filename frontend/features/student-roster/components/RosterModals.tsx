@@ -35,6 +35,7 @@ interface RosterModalsProps {
   saving: boolean;
   colleges: College[];
   years: Year[];
+  semesters: any[];
   sections: Section[];
   showImportModal: boolean;
   setShowImportModal: (show: boolean) => void;
@@ -46,6 +47,8 @@ interface RosterModalsProps {
   setImportCollegeId: (id: string) => void;
   importYearId: string;
   setImportYearId: (id: string) => void;
+  importSemesterId: string;
+  setImportSemesterId: (id: string) => void;
   importSectionId: string;
   setImportSectionId: (id: string) => void;
 }
@@ -60,6 +63,7 @@ export function RosterModals({
   saving,
   colleges,
   years,
+  semesters,
   sections,
   showImportModal,
   setShowImportModal,
@@ -71,6 +75,8 @@ export function RosterModals({
   setImportCollegeId,
   importYearId,
   setImportYearId,
+  importSemesterId,
+  setImportSemesterId,
   importSectionId,
   setImportSectionId,
 }: RosterModalsProps) {
@@ -251,6 +257,7 @@ export function RosterModals({
                     onValueChange={(v) => {
                       setImportCollegeId(v);
                       setImportYearId("");
+                      setImportSemesterId("");
                       setImportSectionId("");
                     }}
                   >
@@ -272,6 +279,7 @@ export function RosterModals({
                     value={importYearId}
                     onValueChange={(v) => {
                       setImportYearId(v);
+                      setImportSemesterId("");
                       setImportSectionId("");
                     }}
                     disabled={!importCollegeId}
@@ -289,21 +297,23 @@ export function RosterModals({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Section</Label>
+                  <Label>Semester</Label>
                   <Select
-                    value={importSectionId}
-                    onValueChange={(v) => setImportSectionId(v)}
+                    value={importSemesterId}
+                    onValueChange={setImportSemesterId}
                     disabled={!importYearId}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
                     <SelectContent>
-                      {sections.map((s) => (
-                        <SelectItem key={s.id} value={s.id.toString()}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
+                      {semesters
+                        .filter((s) => s.year_id.toString() === importYearId)
+                        .map((sem) => (
+                          <SelectItem key={sem.id} value={sem.id.toString()}>
+                            {sem.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
