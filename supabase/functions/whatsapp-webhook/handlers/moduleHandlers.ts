@@ -63,14 +63,17 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const noticeText = notices
-          .map((n) => `📌 *${n.title}*\n📅 ${new Date(n.created_at).toLocaleDateString()}\n${n.description ? n.description : "No additional description."}\n`)
-          .join("\n---\n\n");
+        await sendWhatsAppMessage(fromPhone, `📢 *Latest Notices*`);
+        
+        for (const n of notices) {
+          const text = `📌 *${n.title}*\n📅 ${new Date(n.created_at).toLocaleDateString()}\n\n${n.description ? n.description : ""}`;
+          await sendWhatsAppMessage(fromPhone, text.trim());
+        }
 
         await sendWhatsAppMessage(
           fromPhone,
           "",
-          buildWhatsAppQuickReplies(`📢 *Latest Notices*\n\n${noticeText}`)
+          buildWhatsAppQuickReplies(`Check out the notices above. What would you like to do next?`)
         );
         break;
       }
@@ -99,14 +102,17 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const eventText = events
-          .map((e) => `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Location: ${e.location || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n${e.description ? `📝 ${e.description}\n` : ""}`)
-          .join("\n---\n\n");
+        await sendWhatsAppMessage(fromPhone, `🎉 *Upcoming Events*`);
+        
+        for (const e of events) {
+          const text = `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Location: ${e.location || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n\n${e.description ? `${e.description}` : ""}`;
+          await sendWhatsAppMessage(fromPhone, text.trim());
+        }
 
         await sendWhatsAppMessage(
           fromPhone,
           "",
-          buildWhatsAppQuickReplies(`🎉 *Upcoming Events*\n\n${eventText}`)
+          buildWhatsAppQuickReplies(`What would you like to do next?`)
         );
         break;
       }
@@ -127,14 +133,17 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const timetableText = timetables
-          .map((t) => `📅 *${t.title}*\n${t.notes ? `📝 ${t.notes}\n` : ""}🔗 View Timetable: ${t.file_url || "Contact Admin"}`)
-          .join("\n\n");
+        await sendWhatsAppMessage(fromPhone, `⏰ *Class Timetables*`);
+        
+        for (const t of timetables) {
+          const text = `📅 *${t.title}*\n\n${t.notes ? `${t.notes}\n\n` : ""}🔗 View Timetable: ${t.file_url || "Contact Admin"}`;
+          await sendWhatsAppMessage(fromPhone, text.trim());
+        }
 
         await sendWhatsAppMessage(
           fromPhone,
           "",
-          buildWhatsAppQuickReplies(`⏰ *Class Timetables*\n\n${timetableText}`)
+          buildWhatsAppQuickReplies(`What would you like to do next?`)
         );
         break;
       }
@@ -163,14 +172,17 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const matText = materials
-          .map((m) => `📖 *${m.topic || m.subject}* (${m.subject || "General"})\n${m.description ? `📝 ${m.description}\n` : ""}🔗 Download: ${m.file_url || "N/A"}`)
-          .join("\n---\n\n");
+        await sendWhatsAppMessage(fromPhone, `📚 *Study Materials & Notes*`);
+        
+        for (const m of materials) {
+          const text = `📖 *${m.topic || m.subject}* (${m.subject || "General"})\n\n${m.description ? `${m.description}\n\n` : ""}🔗 Download: ${m.file_url || "N/A"}`;
+          await sendWhatsAppMessage(fromPhone, text.trim());
+        }
 
         await sendWhatsAppMessage(
           fromPhone,
           "",
-          buildWhatsAppQuickReplies(`📚 *Study Materials & Notes*\n\n${matText}`)
+          buildWhatsAppQuickReplies(`What would you like to do next?`)
         );
         break;
       }
@@ -216,14 +228,17 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const internshipText = internships
-          .map((i) => `💼 *${i.title || "Internship Opportunity"}*\n🏢 Info: ${i.info ? i.info.substring(0, 100) + "..." : "No additional details"}\n🔗 Apply: ${i.apply_url || i.file_url || "Check portal"}`)
-          .join("\n---\n\n");
+        await sendWhatsAppMessage(fromPhone, `💼 *Latest Internships*`);
+        
+        for (const i of internships) {
+          const text = `💼 *${i.title || "Internship Opportunity"}*\n🏢 Info: ${i.info ? i.info : "No additional details"}\n🔗 Apply: ${i.apply_url || i.file_url || "Check portal"}`;
+          await sendWhatsAppMessage(fromPhone, text.trim());
+        }
 
         await sendWhatsAppMessage(
           fromPhone,
           "",
-          buildWhatsAppQuickReplies(`💼 *Latest Internships*\n\n${internshipText}`)
+          buildWhatsAppQuickReplies(`What would you like to do next?`)
         );
         break;
       }
