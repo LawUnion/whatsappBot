@@ -44,7 +44,6 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         const { data: allNotices } = await supabase
           .from("notices")
           .select("*")
-          .order("pinned", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(20);
           
@@ -65,7 +64,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const noticeText = notices
-          .map((n) => `📌 *${n.title}* ${n.pinned ? "⭐" : ""}\n📅 ${new Date(n.created_at).toLocaleDateString()}\n${n.description ? n.description : "No additional description."}\n`)
+          .map((n) => `📌 *${n.title}*\n📅 ${new Date(n.created_at).toLocaleDateString()}\n${n.description ? n.description : "No additional description."}\n`)
           .join("\n---\n\n");
 
         await sendWhatsAppMessage(
