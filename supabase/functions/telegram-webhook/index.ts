@@ -1213,13 +1213,19 @@ async function handleModule(
 
 // Module handlers
 async function handleNotices(ctx: any, student: any) {
-  const { data: notices } = await supabase
+  const { data: allNotices } = await supabase
     .from("notices")
     .select("*")
     .eq("approval_status", "approved")
-    .or(`college_id.is.null,college_id.eq.${student.college_id}`)
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(100);
+    
+  const notices = allNotices?.filter(n => {
+    if (n.target_colleges && n.target_colleges.length > 0) {
+      return n.target_colleges.includes(student.college_id);
+    }
+    return true;
+  }).slice(0, 30) || [];
 
   // Further filter by section
   const filteredNotices =
@@ -1285,13 +1291,19 @@ async function handleNotices(ctx: any, student: any) {
 async function handleNoticesPage(ctx: any, student: any, page: number) {
   await ctx.answerCallbackQuery();
 
-  const { data: notices } = await supabase
+  const { data: allNotices } = await supabase
     .from("notices")
     .select("*")
     .eq("approval_status", "approved")
-    .or(`college_id.is.null,college_id.eq.${student.college_id}`)
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(100);
+    
+  const notices = allNotices?.filter(n => {
+    if (n.target_colleges && n.target_colleges.length > 0) {
+      return n.target_colleges.includes(student.college_id);
+    }
+    return true;
+  }).slice(0, 30) || [];
 
   const filteredNotices =
     notices?.filter((notice: any) => {

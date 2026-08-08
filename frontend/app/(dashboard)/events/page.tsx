@@ -183,7 +183,7 @@ export default function EventsPage() {
     setNewTypeId("");
     setNewDate("");
     setNewDescription("");
-    setNewCollegeId("all");
+    setNewTargetColleges(colleges.map((c) => c.id));
     setNewResourceType("none");
     setNewResourceUrl("");
     setSelectedFile(null);
@@ -415,21 +415,24 @@ export default function EventsPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">
-                  Target College
+                  Target Colleges
                 </label>
-                <Select value={newCollegeId} onValueChange={setNewCollegeId}>
-                  <SelectTrigger className="bg-slate-50 border-slate-200">
-                    <SelectValue placeholder="Select college" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Colleges</SelectItem>
-                    {colleges.map((c) => (
-                      <SelectItem key={c.id} value={c.id.toString()}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2 flex-wrap">
+                  {colleges.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => toggleCollege(c.id)}
+                      className={`px-3 py-2 flex-1 min-w-[80px] text-xs font-semibold border rounded-lg transition-all ${
+                        newTargetColleges.includes(c.id)
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-white text-slate-400 border-slate-200 hover:border-slate-400"
+                      }`}
+                    >
+                      {c.code || c.name}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">

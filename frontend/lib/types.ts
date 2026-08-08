@@ -209,12 +209,11 @@ export interface Event {
   event_time?: string;
   location?: string;
   file_url?: string;
-  college_id?: number;
+  target_colleges?: number[];
   society_id?: number;
   created_by?: string;
   created_at: string;
   event_type?: EventType;
-  college?: College;
   society?: Society;
   admin?: Admin;
 }
@@ -226,6 +225,8 @@ export interface Internship {
   deadline?: string;
   apply_url?: string;
   file_url?: string;
+  target_colleges?: number[];
+  target_years?: number[];
   created_by?: string;
   created_at: string;
   admin?: Admin;
@@ -236,12 +237,11 @@ export interface Notice {
   title: string;
   description?: string;
   file_url?: string;
-  college_id?: number;
+  target_colleges?: number[];
   year_id?: number;
   section_id?: number;
   posted_by?: string;
   created_at: string;
-  college?: College;
   year?: Year;
   section?: Section;
   admin?: Admin;
@@ -253,12 +253,11 @@ export interface StudyMaterial {
   topic?: string;
   description?: string;
   file_url?: string;
-  college_id?: number;
+  target_colleges?: number[];
   year_id?: number;
   section_id?: number;
   uploaded_by?: string;
   created_at: string;
-  college?: College;
   year?: Year;
   section?: Section;
   admin?: Admin;

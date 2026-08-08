@@ -47,7 +47,7 @@ export default function NoticesPage() {
   // New notice form state
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [newCollegeId, setNewCollegeId] = useState<string>("all");
+  const [newTargetColleges, setNewTargetColleges] = useState<number[]>([]);
   const [newResourceType, setNewResourceType] = useState<
     "none" | "file" | "link"
   >("none");
@@ -59,9 +59,17 @@ export default function NoticesPage() {
   useEffect(() => {
     if (!adminLoading && admin && adminCollegeId) {
       setFilterCollege(adminCollegeId.toString());
-      setNewCollegeId(adminCollegeId.toString());
+      setNewTargetColleges([adminCollegeId]);
+    } else if (!adminLoading && colleges.length > 0 && newTargetColleges.length === 0) {
+      setNewTargetColleges(colleges.map((c) => c.id));
     }
-  }, [adminLoading, admin, adminCollegeId]);
+  }, [adminLoading, admin, adminCollegeId, colleges]);
+
+  const toggleCollege = (id: number) => {
+    setNewTargetColleges((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    );
+  };
 
   useEffect(() => {
     if (!adminLoading) {
@@ -159,8 +167,8 @@ export default function NoticesPage() {
       approval_status: isSuperAdmin ? "approved" : "pending",
     };
 
-    if (newCollegeId && newCollegeId !== "all") {
-      payload.college_id = parseInt(newCollegeId);
+    if (newTargetColleges.length > 0 && newTargetColleges.length < colleges.length) {
+      payload.target_colleges = newTargetColleges;
     }
 
     const { error } = await supabase.from("notices").insert(payload);
@@ -179,7 +187,7 @@ export default function NoticesPage() {
   const resetForm = () => {
     setNewTitle("");
     setNewDescription("");
-    setNewCollegeId("all");
+    setNewTargetColleges(colleges.map((c) => c.id));
     setNewResourceType("none");
     setNewResourceUrl("");
     setSelectedFile(null);
@@ -288,41 +296,28 @@ export default function NoticesPage() {
                   />
                 </div>
 
-                {/* Target College - only show selector if admin has access to multiple colleges */}
-                {scopedColleges.length > 1 ? (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      Target College
-                    </label>
-                    <Select
-                      value={newCollegeId}
-                      onValueChange={setNewCollegeId}
-                    >
-                      <SelectTrigger className="bg-slate-50 border-slate-200">
-                        <SelectValue placeholder="Select college" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {isSuperAdmin && (
-                          <SelectItem value="all">All Colleges</SelectItem>
-                        )}
-                        {scopedColleges.map((c) => (
-                          <SelectItem key={c.id} value={c.id.toString()}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                {/* Target Colleges */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Target Colleges
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {scopedColleges.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggleCollege(c.id)}
+                        className={`px-3 py-2.5 flex-1 min-w-[80px] text-xs font-semibold border rounded-lg transition-all ${
+                          newTargetColleges.includes(c.id)
+                            ? "bg-slate-900 text-white border-slate-900"
+                            : "bg-white text-slate-400 border-slate-200 hover:border-slate-400"
+                        }`}
+                      >
+                        {c.code || c.name}
+                      </button>
+                    ))}
                   </div>
-                ) : scopedColleges.length === 1 ? (
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <span className="text-xs text-slate-500">
-                      Target College:
-                    </span>
-                    <span className="ml-2 font-medium text-slate-900">
-                      {scopedColleges[0]?.name}
-                    </span>
-                  </div>
-                ) : null}
+                </div>
 
                 {/* Attachment Type Selection */}
                 <div className="space-y-2">

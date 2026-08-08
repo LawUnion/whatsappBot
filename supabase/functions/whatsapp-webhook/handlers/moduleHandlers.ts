@@ -41,15 +41,21 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
 
     switch (moduleName) {
       case "notices": {
-        const { data: notices } = await supabase
+        const { data: allNotices } = await supabase
           .from("notices")
-          .select("*, college:colleges(name)")
-          .or(`college_id.is.null,college_id.eq.${student.college_id || 0}`)
+          .select("*")
           .order("pinned", { ascending: false })
           .order("created_at", { ascending: false })
-          .limit(5);
+          .limit(20);
+          
+        const notices = allNotices?.filter(n => {
+          if (n.target_colleges && n.target_colleges.length > 0) {
+            return n.target_colleges.includes(student.college_id);
+          }
+          return true;
+        }).slice(0, 5) || [];
 
-        if (!notices || notices.length === 0) {
+        if (notices.length === 0) {
           await sendWhatsAppMessage(
             fromPhone,
             "",
@@ -71,14 +77,21 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
       }
 
       case "events": {
-        const { data: events } = await supabase
+        const { data: allEvents } = await supabase
           .from("events")
           .select("*, event_type:event_types(name, icon)")
           .gte("event_date", new Date().toISOString())
           .order("event_date", { ascending: true })
-          .limit(5);
+          .limit(20);
 
-        if (!events || events.length === 0) {
+        const events = allEvents?.filter(e => {
+          if (e.target_colleges && e.target_colleges.length > 0) {
+            return e.target_colleges.includes(student.college_id);
+          }
+          return true;
+        }).slice(0, 5) || [];
+
+        if (events.length === 0) {
           await sendWhatsAppMessage(
             fromPhone,
             "",
@@ -103,7 +116,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         const { data: timetables } = await supabase
           .from("class_timetables")
           .select("*")
-          .eq("college_id", student.college_id || 0)
+          .eq("section_id", student.section_id || 0)
           .limit(3);
 
         if (!timetables || timetables.length === 0) {
@@ -129,13 +142,20 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
 
       case "study-materials":
       case "study_materials": {
-        const { data: materials } = await supabase
+        const { data: allMaterials } = await supabase
           .from("study_materials")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(5);
+          .limit(20);
+          
+        const materials = allMaterials?.filter(m => {
+          if (m.target_colleges && m.target_colleges.length > 0) {
+            return m.target_colleges.includes(student.college_id);
+          }
+          return true;
+        }).slice(0, 5) || [];
 
-        if (!materials || materials.length === 0) {
+        if (materials.length === 0) {
           await sendWhatsAppMessage(
             fromPhone,
             "",
