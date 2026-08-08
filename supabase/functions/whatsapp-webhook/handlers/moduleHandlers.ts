@@ -59,7 +59,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const noticeText = notices
-          .map((n) => `📌 *${n.title}* ${n.pinned ? "⭐" : ""}\n📅 ${new Date(n.created_at).toLocaleDateString()}\n${n.content}\n`)
+          .map((n) => `📌 *${n.title}* ${n.pinned ? "⭐" : ""}\n📅 ${new Date(n.created_at).toLocaleDateString()}\n${n.description ? n.description : "No additional description."}\n`)
           .join("\n---\n\n");
 
         await sendWhatsAppMessage(
@@ -88,7 +88,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const eventText = events
-          .map((e) => `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Venue: ${e.venue || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n`)
+          .map((e) => `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Location: ${e.location || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n${e.description ? `📝 ${e.description}\n` : ""}`)
           .join("\n---\n\n");
 
         await sendWhatsAppMessage(
@@ -116,7 +116,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const timetableText = timetables
-          .map((t) => `📅 *${t.title}*\n🔗 View Timetable: ${t.file_url || "Contact Admin"}`)
+          .map((t) => `📅 *${t.title}*\n${t.notes ? `📝 ${t.notes}\n` : ""}🔗 View Timetable: ${t.file_url || "Contact Admin"}`)
           .join("\n\n");
 
         await sendWhatsAppMessage(
@@ -145,7 +145,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const matText = materials
-          .map((m) => `📖 *${m.title}* (${m.subject || "General"})\n🔗 Download: ${m.file_url}`)
+          .map((m) => `📖 *${m.topic || m.subject}* (${m.subject || "General"})\n${m.description ? `📝 ${m.description}\n` : ""}🔗 Download: ${m.file_url || "N/A"}`)
           .join("\n---\n\n");
 
         await sendWhatsAppMessage(
@@ -171,7 +171,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           return;
         }
 
-        const socText = societies.map((s) => `• *${s.name}*`).join("\n");
+        const socText = societies.map((s) => `• *${s.name}*${s.description ? `\n  ${s.description}` : ""}`).join("\n\n");
         await sendWhatsAppMessage(
           fromPhone,
           "",
@@ -198,7 +198,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         }
 
         const internshipText = internships
-          .map((i) => `💼 *${i.position}*\n🏢 Company: ${i.company_name}\n📅 Deadline: ${i.deadline ? new Date(i.deadline).toLocaleDateString() : "Rolling"}\n🔗 Apply: ${i.apply_url || "Check portal"}`)
+          .map((i) => `💼 *${i.title || "Internship Opportunity"}*\n🏢 Info: ${i.info ? i.info.substring(0, 100) + "..." : "No additional details"}\n🔗 Apply: ${i.apply_url || i.file_url || "Check portal"}`)
           .join("\n---\n\n");
 
         await sendWhatsAppMessage(

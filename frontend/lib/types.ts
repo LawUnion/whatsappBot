@@ -221,9 +221,8 @@ export interface Event {
 
 export interface Internship {
   id: string;
-  company_name: string;
-  position: string;
-  description?: string;
+  title: string;
+  info?: string;
   deadline?: string;
   apply_url?: string;
   file_url?: string;
