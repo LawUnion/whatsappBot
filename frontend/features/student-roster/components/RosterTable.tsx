@@ -38,6 +38,7 @@ export function RosterTable({
           <TableHead>Name</TableHead>
           <TableHead>College</TableHead>
           <TableHead>Year</TableHead>
+          <TableHead>Semester</TableHead>
           <TableHead>Section</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Phone</TableHead>
@@ -54,6 +55,7 @@ export function RosterTable({
               <TableCell><Skeleton className="h-4 w-32" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-16" /></TableCell>
               <TableCell><Skeleton className="h-4 w-12" /></TableCell>
               <TableCell><Skeleton className="h-4 w-32" /></TableCell>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
@@ -64,7 +66,7 @@ export function RosterTable({
         ) : roster.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={10}
+              colSpan={11}
               className="text-center py-8 text-slate-500"
             >
               {totalCount === 0
@@ -98,6 +100,9 @@ export function RosterTable({
               </TableCell>
               <TableCell className="text-slate-600 text-sm">
                 {entry.year?.name || "-"}
+              </TableCell>
+              <TableCell className="text-slate-600 text-sm">
+                {entry.section?.semesters?.name || "-"}
               </TableCell>
               <TableCell className="text-slate-600 text-sm">
                 {entry.section_name || entry.section?.name || "-"}

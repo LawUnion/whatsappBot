@@ -95,7 +95,7 @@ export function useStudentRoster() {
     let query = supabase
       .from("student_roster")
       .select(
-        "*, college:colleges(name), year:years(name), section:sections(name), students!claimed_by(whatsapp_id, telegram_username)",
+        "*, college:colleges(name), year:years(name), section:sections(name, semesters(name)), students!claimed_by(whatsapp_id, telegram_username)",
         { count: "exact" },
       );
 

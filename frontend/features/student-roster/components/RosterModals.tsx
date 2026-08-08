@@ -321,6 +321,7 @@ export function RosterModals({
                     <TableHead>Form Number</TableHead>
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead>Section</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                   </TableRow>
@@ -335,6 +336,9 @@ export function RosterModals({
                         {row.roll_number}
                       </TableCell>
                       <TableCell className="text-sm">{row.name}</TableCell>
+                      <TableCell className="text-sm font-semibold text-center">
+                        {row.section_name || "-"}
+                      </TableCell>
                       <TableCell className="text-sm text-slate-500">
                         {row.email || "-"}
                       </TableCell>
@@ -346,7 +350,7 @@ export function RosterModals({
                   {importData.length > 10 && (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="text-center text-slate-500 text-sm"
                       >
                         ...and {importData.length - 10} more entries

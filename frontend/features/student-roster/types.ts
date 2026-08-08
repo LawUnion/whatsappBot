@@ -14,7 +14,7 @@ export interface RosterEntry {
   created_at: string;
   college?: { name: string };
   year?: { name: string };
-  section?: { name: string };
+  section?: { name: string; semesters?: { name: string } };
   students?: { whatsapp_id: string | null; telegram_username: string | null };
 }
 

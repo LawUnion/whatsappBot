@@ -187,6 +187,7 @@ export default function StudentRosterPage() {
             email: row.email || null,
             phone: row.phone || null,
             college_code: row.college_code || row.college || null,
+            section_name: row.section || row.section_name || null,
           });
         }
       }
@@ -229,6 +230,7 @@ export default function StudentRosterPage() {
         college_id,
         year_id: importYearId ? parseInt(importYearId) : null,
         section_id: importSectionId ? parseInt(importSectionId) : null,
+        section_name: row.section_name ? row.section_name.toUpperCase() : null,
       };
     });
 
