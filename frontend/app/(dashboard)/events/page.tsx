@@ -34,6 +34,7 @@ interface EventType {
 interface College {
   id: number;
   name: string;
+  code?: string;
 }
 
 interface Event {
@@ -42,7 +43,7 @@ interface Event {
   description?: string;
   event_date: string;
   event_type_id: number;
-  college_id?: number;
+  target_colleges?: number[];
   file_url?: string;
   event_type?: { name: string; icon: string };
   college?: { name: string };
@@ -82,7 +83,7 @@ export default function EventsPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newTypeId, setNewTypeId] = useState("");
   const [newDate, setNewDate] = useState("");
-  const [newCollegeId, setNewCollegeId] = useState("all");
+  const [newTargetColleges, setNewTargetColleges] = useState<number[]>([]);
   const [newDescription, setNewDescription] = useState("");
   const [newResourceType, setNewResourceType] = useState<"none" | "file" | "link">("none");
   const [newResourceUrl, setNewResourceUrl] = useState("");
@@ -109,6 +110,12 @@ export default function EventsPage() {
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
+
+  const toggleCollege = (id: number) => {
+    setNewTargetColleges((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    );
+  };
 
   // Filtered and paginated events
   const filteredEvents = useMemo(() => {
@@ -144,7 +151,7 @@ export default function EventsPage() {
     // Filter by college
     if (filterCollege !== "all") {
       filtered = filtered.filter(
-        (e) => e.college_id?.toString() === filterCollege || !e.college_id,
+        (e) => !e.target_colleges || e.target_colleges.includes(parseInt(filterCollege)),
       );
     }
 
@@ -196,7 +203,7 @@ export default function EventsPage() {
     setNewTypeId(event.event_type_id?.toString() || "");
     setNewDate(event.event_date || "");
     setNewDescription(event.description || "");
-    setNewCollegeId(event.college_id?.toString() || "all");
+    setNewTargetColleges(event.target_colleges || []);
     if (event.file_url) {
       setNewResourceType("link");
       setNewResourceUrl(event.file_url);
@@ -241,8 +248,7 @@ export default function EventsPage() {
       description: newDescription,
       event_date: newDate,
       event_type_id: parseInt(newTypeId),
-      college_id:
-        newCollegeId && newCollegeId !== "all" ? parseInt(newCollegeId) : null,
+      target_colleges: newTargetColleges.length > 0 && newTargetColleges.length < colleges.length ? newTargetColleges : null,
       file_url: fileUrl,
     };
 
