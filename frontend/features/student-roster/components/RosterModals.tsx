@@ -318,6 +318,7 @@ export function RosterModals({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Form Number</TableHead>
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
@@ -328,18 +329,24 @@ export function RosterModals({
                   {importData.slice(0, 10).map((row, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="font-mono text-xs">
+                        {row.form_number || "-"}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
                         {row.roll_number}
                       </TableCell>
                       <TableCell className="text-sm">{row.name}</TableCell>
                       <TableCell className="text-sm text-slate-500">
                         {row.email || "-"}
                       </TableCell>
+                      <TableCell className="text-sm text-slate-500">
+                        {row.phone || "-"}
+                      </TableCell>
                     </TableRow>
                   ))}
                   {importData.length > 10 && (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={5}
                         className="text-center text-slate-500 text-sm"
                       >
                         ...and {importData.length - 10} more entries

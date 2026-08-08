@@ -181,6 +181,7 @@ export default function StudentRosterPage() {
 
         if (row.roll_number && row.name) {
           data.push({
+            form_number: row.form_number ? row.form_number.toUpperCase() : null,
             roll_number: row.roll_number.toUpperCase(),
             name: row.name,
             email: row.email || null,
@@ -220,6 +221,7 @@ export default function StudentRosterPage() {
       }
 
       return {
+        form_number: row.form_number,
         roll_number: row.roll_number,
         name: row.name,
         email: row.email,
