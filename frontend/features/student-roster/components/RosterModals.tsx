@@ -54,6 +54,7 @@ interface RosterModalsProps {
   importSectionId: string;
   setImportSectionId: (id: string) => void;
   existingImportKeys?: Set<string>;
+  existingDatabaseRecords?: any[];
   importConflictAction?: "overwrite" | "skip";
   setImportConflictAction?: (action: "overwrite" | "skip") => void;
 }
@@ -85,6 +86,7 @@ export function RosterModals({
   importSectionId,
   setImportSectionId,
   existingImportKeys = new Set(),
+  existingDatabaseRecords = [],
   importConflictAction,
   setImportConflictAction,
 }: RosterModalsProps) {
@@ -97,8 +99,7 @@ export function RosterModals({
   );
 
   const [previewMode, setPreviewMode] = useState<"all" | "duplicates">("all");
-  const duplicateData = importData.filter(row => existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number));
-  const dataToShow = previewMode === "duplicates" ? duplicateData : importData;
+  const dataToShow = previewMode === "duplicates" ? existingDatabaseRecords : importData;
   const displayLimit = previewMode === "duplicates" ? dataToShow.length : 10;
 
   const selectedCollegeName = colleges.find(c => c.id.toString() === importCollegeId)?.name || "-";
@@ -339,7 +340,7 @@ export function RosterModals({
             
             <div className="flex items-center justify-between mt-4 mb-2">
               <p className="text-sm text-slate-600">
-                {previewMode === "all" ? `Found ${importData.length} entries to import.` : `Found ${duplicateData.length} existing entries.`} Review the data below:
+                {previewMode === "all" ? `Found ${importData.length} entries to import.` : `Found ${existingDatabaseRecords.length} existing entries in the database.`} Review the data below:
               </p>
               {existingImportKeys.size > 0 && (
                 <div className="flex gap-2">
@@ -376,8 +377,22 @@ export function RosterModals({
                 </TableHeader>
                 <TableBody>
                   {dataToShow.slice(0, displayLimit).map((row, idx) => {
-                    const isExisting = existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
-                    const rowCollegeName = row.college_code ? (colleges.find(c => c.code.toLowerCase() === row.college_code.toLowerCase())?.name || row.college_code) : selectedCollegeName;
+                    const isExisting = previewMode === "duplicates" || existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
+                    
+                    let rowCollegeName = "-";
+                    let rowYearName = "-";
+                    let rowSemesterName = "-";
+
+                    if (previewMode === "all") {
+                      rowCollegeName = row.college_code ? (colleges.find(c => c.code.toLowerCase() === row.college_code.toLowerCase())?.name || row.college_code) : selectedCollegeName;
+                      rowYearName = selectedYearName;
+                      rowSemesterName = selectedSemesterName;
+                    } else {
+                      rowCollegeName = colleges.find(c => c.id === row.college_id)?.name || "-";
+                      rowYearName = years.find(y => y.id === row.year_id)?.name || "-";
+                      const rowSection = sections.find(s => s.id === row.section_id);
+                      rowSemesterName = semesters.find(s => s.id === rowSection?.semester_id)?.name || "-";
+                    }
 
                     return (
                     <TableRow key={idx} className={isExisting ? "bg-amber-50/50" : ""}>
@@ -386,7 +401,7 @@ export function RosterModals({
                       </TableCell>
                       <TableCell className="font-mono text-xs whitespace-nowrap">
                         {row.roll_number || "-"}
-                        {isExisting && (
+                        {isExisting && previewMode === "all" && (
                           <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-200">
                             Exists
                           </Badge>
@@ -397,10 +412,10 @@ export function RosterModals({
                         {rowCollegeName}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">
-                        {selectedYearName}
+                        {rowYearName}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">
-                        {selectedSemesterName}
+                        {rowSemesterName}
                       </TableCell>
                     </TableRow>
                     );

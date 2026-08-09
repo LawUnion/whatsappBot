@@ -17,6 +17,7 @@ export default function StudentRosterPage() {
   const [importSemesterId, setImportSemesterId] = useState("");
 
   const [existingImportKeys, setExistingImportKeys] = useState<Set<string>>(new Set());
+  const [existingDatabaseRecords, setExistingDatabaseRecords] = useState<any[]>([]);
   const [importConflictAction, setImportConflictAction] = useState<"overwrite" | "skip">("overwrite");
 
   const {
@@ -210,6 +211,7 @@ export default function StudentRosterPage() {
 
       // Pre-check for database duplicates
       let existingKeysSet = new Set<string>();
+      let existingRecordsArray: any[] = [];
       if (data.length > 0) {
         const onConflictCol = data[0]?.form_number ? "form_number" : "roll_number";
         const keysToCheck = data.map((d: any) => d[onConflictCol]).filter(Boolean);
@@ -217,16 +219,18 @@ export default function StudentRosterPage() {
         if (keysToCheck.length > 0) {
           const { data: existingRecords } = await supabase
             .from("student_roster")
-            .select(onConflictCol)
+            .select("*")
             .in(onConflictCol, keysToCheck);
             
           if (existingRecords) {
+            existingRecordsArray = existingRecords;
             existingKeysSet = new Set(existingRecords.map((r: any) => r[onConflictCol]));
           }
         }
       }
 
       setExistingImportKeys(existingKeysSet);
+      setExistingDatabaseRecords(existingRecordsArray);
       setImportConflictAction("overwrite");
       setImportData(data);
       setImportCollegeId("");
@@ -513,6 +517,7 @@ export default function StudentRosterPage() {
         importSectionId={importSectionId}
         setImportSectionId={setImportSectionId}
         existingImportKeys={existingImportKeys}
+        existingDatabaseRecords={existingDatabaseRecords}
         importConflictAction={importConflictAction}
         setImportConflictAction={setImportConflictAction}
       />
