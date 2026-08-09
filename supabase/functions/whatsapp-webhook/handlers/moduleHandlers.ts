@@ -66,8 +66,15 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         await sendWhatsAppMessage(fromPhone, `📢 *Latest Notices*`);
         
         for (const n of notices) {
-          const text = `📌 *${n.title}*\n📅 ${new Date(n.created_at).toLocaleDateString()}\n\n${n.description ? n.description : ""}`;
-          await sendWhatsAppMessage(fromPhone, text.trim());
+          const text = `📌 *${n.title}*\n📅 ${new Date(n.created_at).toLocaleDateString()}\n\n${n.description ? n.description : ""}`.trim();
+          
+          if (n.file_url) {
+            await sendWhatsAppMedia(fromPhone, n.file_url, text);
+            // Add a delay so the media message delivers before the next message
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+          } else {
+            await sendWhatsAppMessage(fromPhone, text);
+          }
         }
 
         await sendWhatsAppMessage(
@@ -105,8 +112,15 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         await sendWhatsAppMessage(fromPhone, `🎉 *Upcoming Events*`);
         
         for (const e of events) {
-          const text = `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Location: ${e.location || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n\n${e.description ? `${e.description}` : ""}`;
-          await sendWhatsAppMessage(fromPhone, text.trim());
+          const text = `🗓️ *${e.title}* (${e.event_type?.name || "Event"})\n📍 Location: ${e.location || "TBA"}\n📅 Date: ${new Date(e.event_date).toLocaleDateString()}\n\n${e.description ? `${e.description}` : ""}`.trim();
+          
+          if (e.file_url) {
+            await sendWhatsAppMedia(fromPhone, e.file_url, text);
+            // Add a delay so the media message delivers before the next message
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+          } else {
+            await sendWhatsAppMessage(fromPhone, text);
+          }
         }
 
         await sendWhatsAppMessage(
