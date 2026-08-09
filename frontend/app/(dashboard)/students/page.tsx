@@ -19,6 +19,7 @@ export default function StudentsPage() {
     colleges,
     scopedColleges,
     years,
+    semesters,
     sections,
     searchQuery,
     setSearchQuery,
