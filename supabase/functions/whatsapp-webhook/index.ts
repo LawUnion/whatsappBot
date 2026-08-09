@@ -2,7 +2,7 @@
 // Runs in Supabase Edge Function (Deno runtime)
 
 import { getWhatsAppConfig, verifySignature, supabase, sendWhatsAppMessage, buildWhatsAppQuickReplies, BOT_ADMIN_CONTACT } from "./utils.ts";
-import { resetAndStartRegistration, handleRegistrationFlow } from "./handlers/registrationHandlers.ts";
+import { resetAndStartRegistration, handleRegistrationFlow, startProfileCompletion } from "./handlers/registrationHandlers.ts";
 import { showMainMenu, handleModuleClick } from "./handlers/moduleHandlers.ts";
 
 // Serve webhook requests
@@ -141,6 +141,23 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
 
   // Handle Registered Students
   if (student) {
+    // If student is missing essential profile details, trigger profile completion
+    if (!student.college_id || !student.semester_id || !student.section_id) {
+      const { data: session } = await supabase
+        .from("registration_sessions")
+        .select("*")
+        .eq("whatsapp_id", fromPhone)
+        .maybeSingle();
+
+      if (session && session.step.startsWith("awaiting_profile_")) {
+        await handleRegistrationFlow(fromPhone, contactName, text, textLower);
+        return;
+      }
+      
+      await startProfileCompletion(fromPhone, student);
+      return;
+    }
+
     if (student.status === "Pending") {
       await sendWhatsAppMessage(
         fromPhone,

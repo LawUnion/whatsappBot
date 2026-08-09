@@ -35,6 +35,48 @@ export async function resetAndStartRegistration(fromPhone: string, contactName: 
   );
 }
 
+export async function startProfileCompletion(fromPhone: string, student: any) {
+  // Determine what's missing
+  let nextStep = "awaiting_profile_college";
+  let promptText = `👋 *Profile Incomplete*\n\nWelcome back! Before you can continue, we need to update your profile details.`;
+
+  if (!student.college_id) {
+    nextStep = "awaiting_profile_college";
+    const { data: colleges } = await supabase.from("colleges").select("*").order("id");
+    const collegeList = colleges?.map((c) => `• ${c.code}: ${c.name}`).join("\n") || "• LC-1\n• LC-2\n• CLC";
+    promptText += `\n\n📝 First, please enter the code of your college:\n\n${collegeList}\n\n_Type LC-1, LC-2, or CLC_`;
+  } else if (!student.semester_id) {
+    nextStep = "awaiting_profile_semester";
+    promptText += `\n\n📝 Please enter your current *Semester* (Type a number from 1 to 6):`;
+  } else if (!student.section_id) {
+    nextStep = "awaiting_profile_section";
+    promptText += `\n\n📝 Please enter your current *Section* (Example: A, B, C...):`;
+  }
+
+  // Create or update a session
+  await supabase.from("registration_sessions").upsert(
+    {
+      whatsapp_id: fromPhone,
+      telegram_first_name: student.name || student.whatsapp_name,
+      step: nextStep,
+      platform: "whatsapp",
+      attempts: 0,
+      updated_at: new Date().toISOString(),
+      college_id: student.college_id,
+      year_id: student.year_id,
+      semester_id: student.semester_id,
+      section_id: student.section_id,
+    },
+    { onConflict: "whatsapp_id" }
+  );
+
+  await sendWhatsAppMessage(
+    fromPhone,
+    "",
+    buildWhatsAppQuickReplies(promptText)
+  );
+}
+
 // Handles Registration Flow for new students or users in a registration session
 export async function handleRegistrationFlow(fromPhone: string, contactName: string, text: string, textLower: string) {
   if (textLower === "/start" || textLower === "start" || textLower === "hi" || textLower === "hello" || textLower === "hey") {
@@ -287,30 +329,33 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
 
     await supabase
       .from("registration_sessions")
-      .update({ step: "awaiting_year", college_id: college.id })
+      .update({ step: "awaiting_semester", college_id: college.id })
       .eq("id", session.id);
 
     await sendWhatsAppMessage(
       fromPhone,
       "",
       buildWhatsAppQuickReplies(
-        `Selected: *${college.name}*\n\nNow, enter your *Year of Study* (Type 1, 2, or 3):`,
+        `Selected: *${college.name}*\n\nNow, enter your *Semester* (Type a number from 1 to 6):`,
         [{ id: "reset", title: "🔄 Reset / Restart" }]
       )
     );
     return;
   }
 
-  if (session && session.step === "awaiting_year") {
-    const yearNumber = parseInt(text.trim());
-    if (isNaN(yearNumber) || yearNumber < 1 || yearNumber > 3) {
+  if (session && session.step === "awaiting_semester") {
+    const semNumber = parseInt(text.trim());
+    if (isNaN(semNumber) || semNumber < 1 || semNumber > 6) {
       await sendWhatsAppMessage(
         fromPhone,
         "",
-        buildWhatsAppQuickReplies(`❌ Invalid year. Please type 1, 2, or 3:`, [{ id: "reset", title: "🔄 Reset / Restart" }])
+        buildWhatsAppQuickReplies(`❌ Invalid semester. Please type a number between 1 and 6:`, [{ id: "reset", title: "🔄 Reset / Restart" }])
       );
       return;
     }
+
+    // Map semester to year (1,2 -> year 1; 3,4 -> year 2; 5,6 -> year 3)
+    const yearNumber = Math.ceil(semNumber / 2);
 
     const { data: yearObj } = await supabase
       .from("years")
@@ -318,22 +363,43 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
       .eq("college_id", session.college_id)
       .eq("year_number", yearNumber)
       .maybeSingle();
+      
+    // Find semester obj
+    const { data: semObj } = await supabase
+      .from("semesters")
+      .select("*")
+      .eq("year_id", yearObj?.id)
+      .eq("semester_number", semNumber)
+      .maybeSingle();
 
     await supabase
       .from("registration_sessions")
-      .update({ step: "awaiting_section", year_id: yearObj?.id || yearNumber })
+      .update({ 
+        step: "awaiting_section", 
+        year_id: yearObj?.id || null,
+        semester_id: semObj?.id || null 
+      })
       .eq("id", session.id);
 
     await sendWhatsAppMessage(
       fromPhone,
       "",
-      buildWhatsAppQuickReplies(`Year ${yearNumber} selected.\n\nNow, enter your *Section* (Example: A, B, C...):`, [{ id: "reset", title: "🔄 Reset / Restart" }])
+      buildWhatsAppQuickReplies(`Semester ${semNumber} selected (mapped to Year ${yearNumber}).\n\nNow, enter your *Section* (Example: A, B, C...):`, [{ id: "reset", title: "🔄 Reset / Restart" }])
     );
     return;
   }
 
   if (session && session.step === "awaiting_section") {
     const sectionName = text.trim().toUpperCase();
+    
+    // Find section based on semester
+    const { data: sectionObj } = await supabase
+      .from("sections")
+      .select("id")
+      .eq("semester_id", session.semester_id)
+      .eq("name", sectionName)
+      .maybeSingle();
+
     const { data: newStudent } = await supabase
       .from("students")
       .insert({
@@ -344,6 +410,7 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
         name: session.name || contactName,
         college_id: session.college_id,
         year_id: typeof session.year_id === "number" ? session.year_id : null,
+        section_id: sectionObj?.id || null,
         status: "Pending", // Manual registrations require admin approval
       })
       .select("*, college:colleges(name)")
@@ -357,6 +424,73 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
       buildWhatsAppQuickReplies(
         `✅ *Manual Registration Submitted!*\n\nSince your form number was not in the roster, your registration is now *Pending Admin Approval*.\n\nYou will be notified via WhatsApp as soon as an admin approves your request!`,
         [{ id: "reset", title: "🔄 Reset / Restart" }]
+      )
+    );
+    return;
+  }
+
+  // --- Profile Completion Flow ---
+
+  if (session && session.step === "awaiting_profile_college") {
+    const codeEntered = text.trim().toUpperCase();
+    const { data: college } = await supabase.from("colleges").select("*").eq("code", codeEntered).maybeSingle();
+
+    if (!college) {
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid college code. Please type exactly *LC-1*, *LC-2*, or *CLC*:`));
+      return;
+    }
+
+    await supabase.from("registration_sessions").update({ step: "awaiting_profile_semester", college_id: college.id }).eq("id", session.id);
+    await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`Selected: *${college.name}*\n\nNow, enter your current *Semester* (Type a number from 1 to 6):`));
+    return;
+  }
+
+  if (session && session.step === "awaiting_profile_semester") {
+    const semNumber = parseInt(text.trim());
+    if (isNaN(semNumber) || semNumber < 1 || semNumber > 6) {
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid semester. Please type a number between 1 and 6:`));
+      return;
+    }
+
+    const yearNumber = Math.ceil(semNumber / 2);
+    const { data: yearObj } = await supabase.from("years").select("*").eq("college_id", session.college_id).eq("year_number", yearNumber).maybeSingle();
+    const { data: semObj } = await supabase.from("semesters").select("*").eq("year_id", yearObj?.id).eq("semester_number", semNumber).maybeSingle();
+
+    await supabase.from("registration_sessions").update({ step: "awaiting_profile_section", year_id: yearObj?.id || null, semester_id: semObj?.id || null }).eq("id", session.id);
+    await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`Semester ${semNumber} selected.\n\nFinally, enter your current *Section* (Example: A, B, C...):`));
+    return;
+  }
+
+  if (session && session.step === "awaiting_profile_section") {
+    const sectionName = text.trim().toUpperCase();
+    
+    const { data: sectionObj } = await supabase
+      .from("sections")
+      .select("id")
+      .eq("semester_id", session.semester_id)
+      .eq("name", sectionName)
+      .maybeSingle();
+
+    // Update the actual student record
+    const { data: studentRecord } = await supabase.from("students").select("id").eq("whatsapp_id", fromPhone).maybeSingle();
+    
+    if (studentRecord) {
+      await supabase.from("students").update({
+        college_id: session.college_id,
+        year_id: typeof session.year_id === "number" ? session.year_id : null,
+        semester_id: session.semester_id,
+        section_id: sectionObj?.id || null,
+      }).eq("id", studentRecord.id);
+    }
+
+    await supabase.from("registration_sessions").delete().eq("id", session.id);
+
+    await sendWhatsAppMessage(
+      fromPhone,
+      "",
+      buildWhatsAppQuickReplies(
+        `✅ *Profile Updated Successfully!*\n\nThank you for completing your profile. You now have full access to the bot.`,
+        [{ id: "menu", title: "📋 Main Menu" }]
       )
     );
     return;
