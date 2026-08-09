@@ -26,31 +26,40 @@ DROP POLICY IF EXISTS "Study material admins can delete materials" ON study_mate
 -- 1. NOTICES
 ALTER TABLE notices ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 
--- Migrate existing college_id to target_colleges
-UPDATE notices SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL;
-
--- Drop college_id
-ALTER TABLE notices DROP COLUMN IF EXISTS college_id;
+-- Migrate existing college_id to target_colleges if column exists
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notices' AND column_name='college_id') THEN
+    EXECUTE 'UPDATE notices SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL';
+    EXECUTE 'ALTER TABLE notices DROP COLUMN college_id';
+  END IF;
+END $$;
 
 
 -- 2. EVENTS
 ALTER TABLE events ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 
--- Migrate existing college_id to target_colleges
-UPDATE events SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL;
-
--- Drop college_id
-ALTER TABLE events DROP COLUMN IF EXISTS college_id;
+-- Migrate existing college_id to target_colleges if column exists
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='events' AND column_name='college_id') THEN
+    EXECUTE 'UPDATE events SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL';
+    EXECUTE 'ALTER TABLE events DROP COLUMN college_id';
+  END IF;
+END $$;
 
 
 -- 3. STUDY MATERIALS
 ALTER TABLE study_materials ADD COLUMN IF NOT EXISTS target_colleges INTEGER[];
 
--- Migrate existing college_id to target_colleges
-UPDATE study_materials SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL AND (target_colleges IS NULL OR array_length(target_colleges, 1) = 0);
-
--- Drop college_id
-ALTER TABLE study_materials DROP COLUMN IF EXISTS college_id;
+-- Migrate existing college_id to target_colleges if column exists
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='study_materials' AND column_name='college_id') THEN
+    EXECUTE 'UPDATE study_materials SET target_colleges = ARRAY[college_id] WHERE college_id IS NOT NULL AND (target_colleges IS NULL OR array_length(target_colleges, 1) = 0)';
+    EXECUTE 'ALTER TABLE study_materials DROP COLUMN college_id';
+  END IF;
+END $$;
 
 -- 4. Recreate Indexes
 CREATE INDEX IF NOT EXISTS idx_notices_target_colleges ON notices USING GIN(target_colleges);
