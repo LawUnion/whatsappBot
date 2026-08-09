@@ -403,13 +403,17 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
   if (session && session.step === "awaiting_section") {
     const sectionName = text.trim().toUpperCase();
     
-    // Find section based on semester
     const { data: sectionObj } = await supabase
       .from("sections")
       .select("id")
       .eq("semester_id", session.semester_id)
       .eq("name", sectionName)
       .maybeSingle();
+
+    if (!sectionObj) {
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid section. Please enter a valid Section for this semester (Example: A, B, C...):`));
+      return;
+    }
 
     const { data: newStudent } = await supabase
       .from("students")
@@ -488,6 +492,11 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
       .eq("semester_id", session.semester_id)
       .eq("name", sectionName)
       .maybeSingle();
+
+    if (!sectionObj) {
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid section. Please enter a valid Section for this semester (Example: A, B, C...):`));
+      return;
+    }
 
     // Update the actual student record
     const { data: studentRecord } = await supabase.from("students").select("id").eq("whatsapp_id", fromPhone).maybeSingle();
