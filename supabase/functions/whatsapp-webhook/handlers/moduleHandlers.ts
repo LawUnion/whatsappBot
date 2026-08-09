@@ -140,6 +140,8 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           
           if (t.file_url) {
             await sendWhatsAppMedia(fromPhone, t.file_url, text);
+            // Add a delay so the media message delivers before the next text message
+            await new Promise((resolve) => setTimeout(resolve, 2500));
           } else {
             await sendWhatsAppMessage(fromPhone, text);
           }
@@ -184,6 +186,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           
           if (m.file_url) {
             await sendWhatsAppMedia(fromPhone, m.file_url, text);
+            await new Promise((resolve) => setTimeout(resolve, 2500));
           } else {
             await sendWhatsAppMessage(fromPhone, text);
           }
@@ -245,6 +248,7 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
           
           if (i.file_url) {
             await sendWhatsAppMedia(fromPhone, i.file_url, text.trim());
+            await new Promise((resolve) => setTimeout(resolve, 2500));
           } else {
             await sendWhatsAppMessage(fromPhone, text.trim());
           }
