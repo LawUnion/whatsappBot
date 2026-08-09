@@ -511,6 +511,10 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
         [{ id: "menu", title: "📋 Main Menu" }]
       )
     );
+    
+    // Auto-show main menu after profile update
+    const updatedStudent = { ...studentRecord, college_id: session.college_id, section_id: sectionObj?.id };
+    await showMainMenu(fromPhone, updatedStudent);
     return;
   }
 
