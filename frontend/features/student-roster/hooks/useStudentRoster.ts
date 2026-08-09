@@ -160,16 +160,30 @@ export function useStudentRoster() {
 
     setLoading(true);
 
-    // First free the student record
-    const { error: studentError } = await supabase
+    // Attempt to delete the student entirely so they are forced to register as a new user
+    let { error: studentError } = await supabase
       .from("students")
-      .update({ roster_id: null, status: "Pending" })
+      .delete()
       .eq("roster_id", entry.id);
 
+    // If deletion fails (likely due to foreign key constraints like logs or support messages),
+    // fallback to nullifying their connection IDs so the number is completely unlinked.
     if (studentError) {
-      toast.error("Error updating student record: " + studentError.message);
-      setLoading(false);
-      return;
+      const { error: updateError } = await supabase
+        .from("students")
+        .update({ 
+          whatsapp_id: null, 
+          telegram_user_id: null, 
+          roster_id: null, 
+          status: "Pending" 
+        })
+        .eq("roster_id", entry.id);
+        
+      if (updateError) {
+        toast.error("Error updating student record: " + updateError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     // Then update the roster entry
