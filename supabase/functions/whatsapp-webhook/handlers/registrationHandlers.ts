@@ -403,12 +403,22 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
   if (session && session.step === "awaiting_section") {
     const sectionName = text.trim().toUpperCase();
     
-    const { data: sectionObj } = await supabase
+    let { data: sectionObj } = await supabase
       .from("sections")
       .select("id")
       .eq("semester_id", session.semester_id)
       .eq("name", sectionName)
       .maybeSingle();
+
+    if (!sectionObj && sectionName.length <= 5) {
+      // Auto-create missing section to support flexible section names
+      const { data: newSection } = await supabase
+        .from("sections")
+        .insert({ semester_id: session.semester_id, name: sectionName })
+        .select("id")
+        .maybeSingle();
+      if (newSection) sectionObj = newSection;
+    }
 
     if (!sectionObj) {
       await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid section. Please enter a valid Section for this semester (Example: A, B, C...):`));
@@ -486,12 +496,22 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
   if (session && session.step === "awaiting_profile_section") {
     const sectionName = text.trim().toUpperCase();
     
-    const { data: sectionObj } = await supabase
+    let { data: sectionObj } = await supabase
       .from("sections")
       .select("id")
       .eq("semester_id", session.semester_id)
       .eq("name", sectionName)
       .maybeSingle();
+
+    if (!sectionObj && sectionName.length <= 5) {
+      // Auto-create missing section to support flexible section names
+      const { data: newSection } = await supabase
+        .from("sections")
+        .insert({ semester_id: session.semester_id, name: sectionName })
+        .select("id")
+        .maybeSingle();
+      if (newSection) sectionObj = newSection;
+    }
 
     if (!sectionObj) {
       await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Invalid section. Please enter a valid Section for this semester (Example: A, B, C...):`));
