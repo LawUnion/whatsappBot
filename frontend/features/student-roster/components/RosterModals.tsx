@@ -99,6 +99,11 @@ export function RosterModals({
   const [previewMode, setPreviewMode] = useState<"all" | "duplicates">("all");
   const duplicateData = importData.filter(row => existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number));
   const dataToShow = previewMode === "duplicates" ? duplicateData : importData;
+  const displayLimit = previewMode === "duplicates" ? dataToShow.length : 10;
+
+  const selectedCollegeName = colleges.find(c => c.id.toString() === importCollegeId)?.name || "-";
+  const selectedYearName = years.find(y => y.id.toString() === importYearId)?.name || "-";
+  const selectedSemesterName = semesters.find(s => s.id.toString() === importSemesterId)?.name || "-";
 
   return (
     <>
@@ -364,20 +369,22 @@ export function RosterModals({
                     <TableHead>Form Number</TableHead>
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Section</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
+                    <TableHead>College</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Semester</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dataToShow.slice(0, 10).map((row, idx) => {
+                  {dataToShow.slice(0, displayLimit).map((row, idx) => {
                     const isExisting = existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
+                    const rowCollegeName = row.college_code ? (colleges.find(c => c.code.toLowerCase() === row.college_code.toLowerCase())?.name || row.college_code) : selectedCollegeName;
+
                     return (
                     <TableRow key={idx} className={isExisting ? "bg-amber-50/50" : ""}>
-                      <TableCell className="font-mono text-xs">
+                      <TableCell className="font-mono text-xs whitespace-nowrap">
                         {row.form_number || "-"}
                       </TableCell>
-                      <TableCell className="font-mono text-xs">
+                      <TableCell className="font-mono text-xs whitespace-nowrap">
                         {row.roll_number || "-"}
                         {isExisting && (
                           <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-200">
@@ -386,25 +393,25 @@ export function RosterModals({
                         )}
                       </TableCell>
                       <TableCell className="text-sm">{row.name}</TableCell>
-                      <TableCell className="text-sm font-semibold text-center">
-                        {row.section_name || "-"}
+                      <TableCell className="text-sm text-slate-600 truncate max-w-[120px]" title={rowCollegeName}>
+                        {rowCollegeName}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-500">
-                        {row.email || "-"}
+                      <TableCell className="text-sm text-slate-600">
+                        {selectedYearName}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-500">
-                        {row.phone || "-"}
+                      <TableCell className="text-sm text-slate-600">
+                        {selectedSemesterName}
                       </TableCell>
                     </TableRow>
                     );
                   })}
-                  {dataToShow.length > 10 && (
+                  {dataToShow.length > displayLimit && (
                     <TableRow>
                       <TableCell
                         colSpan={6}
-                        className="text-center text-slate-500 text-sm"
+                        className="text-center text-slate-500 text-sm py-4"
                       >
-                        ...and {dataToShow.length - 10} more entries
+                        ...and {dataToShow.length - displayLimit} more entries
                       </TableCell>
                     </TableRow>
                   )}
