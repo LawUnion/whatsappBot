@@ -9,11 +9,15 @@ import { RosterTable } from "@/features/student-roster/components/RosterTable";
 import { RosterModals } from "@/features/student-roster/components/RosterModals";
 import { RosterEntry } from "@/features/student-roster/types";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function StudentRosterPage() {
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importSemesterId, setImportSemesterId] = useState("");
+
+  const [existingImportKeys, setExistingImportKeys] = useState<Set<string>>(new Set());
+  const [importConflictAction, setImportConflictAction] = useState<"overwrite" | "skip">("overwrite");
 
   const {
     roster,
@@ -158,7 +162,7 @@ export default function StudentRosterPage() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const text = event.target?.result as string;
       const lines = text.split("\n").filter((line) => line.trim());
 
@@ -204,6 +208,26 @@ export default function StudentRosterPage() {
         }
       }
 
+      // Pre-check for database duplicates
+      let existingKeysSet = new Set<string>();
+      if (data.length > 0) {
+        const onConflictCol = data[0]?.form_number ? "form_number" : "roll_number";
+        const keysToCheck = data.map((d: any) => d[onConflictCol]).filter(Boolean);
+        
+        if (keysToCheck.length > 0) {
+          const { data: existingRecords } = await supabase
+            .from("student_roster")
+            .select(onConflictCol)
+            .in(onConflictCol, keysToCheck);
+            
+          if (existingRecords) {
+            existingKeysSet = new Set(existingRecords.map((r: any) => r[onConflictCol]));
+          }
+        }
+      }
+
+      setExistingImportKeys(existingKeysSet);
+      setImportConflictAction("overwrite");
       setImportData(data);
       setImportCollegeId("");
       setImportYearId("");
@@ -258,20 +282,43 @@ export default function StudentRosterPage() {
 
     const onConflictCol = importData[0]?.form_number ? "form_number" : "roll_number";
 
+    // Detect internal duplicates and keep only unique values
+    const uniqueDataMap = new Map();
+    for (const item of dataToInsert) {
+      const key = item[onConflictCol];
+      if (key) {
+        uniqueDataMap.set(key, item);
+      }
+    }
+    let deduplicatedDataToInsert = Array.from(uniqueDataMap.values());
+
+    if (importConflictAction === "skip" && existingImportKeys.size > 0) {
+       deduplicatedDataToInsert = deduplicatedDataToInsert.filter(
+         (d: any) => !existingImportKeys.has(d[onConflictCol])
+       );
+    }
+
+    if (deduplicatedDataToInsert.length === 0) {
+      toast.success("No new records to import.");
+      setImporting(false);
+      setShowImportModal(false);
+      setImportData([]);
+      return;
+    }
+
     const { error } = await supabase
       .from("student_roster")
-      .upsert(dataToInsert, { onConflict: onConflictCol });
+      .upsert(deduplicatedDataToInsert, { onConflict: onConflictCol });
 
     if (error) {
       alert("Error importing data: " + error.message);
     } else {
-      alert(`Successfully imported ${dataToInsert.length} entries`);
+      toast.success("Data imported successfully");
       setShowImportModal(false);
       setImportData([]);
       fetchRoster();
       fetchMetadata();
     }
-
     setImporting(false);
   };
 
@@ -465,6 +512,9 @@ export default function StudentRosterPage() {
         setImportSemesterId={setImportSemesterId}
         importSectionId={importSectionId}
         setImportSectionId={setImportSectionId}
+        existingImportKeys={existingImportKeys}
+        importConflictAction={importConflictAction}
+        setImportConflictAction={setImportConflictAction}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -51,6 +52,9 @@ interface RosterModalsProps {
   setImportSemesterId: (id: string) => void;
   importSectionId: string;
   setImportSectionId: (id: string) => void;
+  existingImportKeys?: Set<string>;
+  importConflictAction?: "overwrite" | "skip";
+  setImportConflictAction?: (action: "overwrite" | "skip") => void;
 }
 
 export function RosterModals({
@@ -79,6 +83,9 @@ export function RosterModals({
   setImportSemesterId,
   importSectionId,
   setImportSectionId,
+  existingImportKeys = new Set(),
+  importConflictAction,
+  setImportConflictAction,
 }: RosterModalsProps) {
   const filteredYears = years.filter(
     (y) => y.college_id.toString() === formData.college_id,
@@ -337,13 +344,20 @@ export function RosterModals({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {importData.slice(0, 10).map((row, idx) => (
-                    <TableRow key={idx}>
+                  {importData.slice(0, 10).map((row, idx) => {
+                    const isExisting = existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
+                    return (
+                    <TableRow key={idx} className={isExisting ? "bg-amber-50/50" : ""}>
                       <TableCell className="font-mono text-xs">
                         {row.form_number || "-"}
                       </TableCell>
                       <TableCell className="font-mono text-xs">
-                        {row.roll_number}
+                        {row.roll_number || "-"}
+                        {isExisting && (
+                          <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-200">
+                            Exists
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm">{row.name}</TableCell>
                       <TableCell className="text-sm font-semibold text-center">
@@ -356,7 +370,8 @@ export function RosterModals({
                         {row.phone || "-"}
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                   {importData.length > 10 && (
                     <TableRow>
                       <TableCell
@@ -370,9 +385,39 @@ export function RosterModals({
                 </TableBody>
               </Table>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
-              * Existing entries with the same roll number will be updated
-            </p>
+            
+            {existingImportKeys.size > 0 && setImportConflictAction && (
+              <div className="bg-amber-50 p-4 rounded-md mt-4 border border-amber-200">
+                <p className="text-sm font-medium text-amber-800 mb-3">
+                  Found {existingImportKeys.size} records that already exist in the database.
+                </p>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="conflictAction"
+                      value="overwrite"
+                      checked={importConflictAction === "overwrite"}
+                      onChange={() => setImportConflictAction("overwrite")}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Overwrite existing records with new data</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="conflictAction"
+                      value="skip"
+                      checked={importConflictAction === "skip"}
+                      onChange={() => setImportConflictAction("skip")}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Skip existing records (only add new ones)</span>
+                  </label>
+                </div>
+              </div>
+            )}
+            
           </div>
           <DialogFooter>
             <Button
