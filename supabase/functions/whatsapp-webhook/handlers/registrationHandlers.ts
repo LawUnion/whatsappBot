@@ -35,10 +35,10 @@ export async function resetAndStartRegistration(fromPhone: string, contactName: 
   );
 }
 
-export async function startProfileCompletion(fromPhone: string, student: any) {
+export async function startProfileCompletion(fromPhone: string, student: any, customIntro?: string) {
   // Determine what's missing
   let nextStep = "awaiting_profile_college";
-  let promptText = `👋 *Profile Incomplete*\n\nWelcome back! Before you can continue, we need to update your profile details.`;
+  let promptText = customIntro || `👋 *Profile Incomplete*\n\nWelcome back! Before you can continue, we need to update your profile details.`;
 
   if (!student.college_id) {
     nextStep = "awaiting_profile_college";
@@ -276,15 +276,20 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
         )
       );
     } else {
-      await sendWhatsAppMessage(
-        fromPhone,
-        "",
-        buildWhatsAppQuickReplies(
-          `🎉 *Registration Successful!*\n\nWelcome to Law Connect, *${rosterEntry.name}*!\nYour account is active.`,
-          [{ id: "menu", title: "📋 Main Menu" }]
-        )
-      );
-      await showMainMenu(fromPhone, newStudent);
+      if (!newStudent.college_id || !newStudent.semester_id || !newStudent.section_id) {
+        const customIntro = `🎉 *Registration Successful!*\n\nWelcome to Law Connect, *${rosterEntry.name}*!\n\nTo serve you better and provide accurate timetables and materials, we need to quickly update your profile.`;
+        await startProfileCompletion(fromPhone, newStudent, customIntro);
+      } else {
+        await sendWhatsAppMessage(
+          fromPhone,
+          "",
+          buildWhatsAppQuickReplies(
+            `🎉 *Registration Successful!*\n\nWelcome to Law Connect, *${rosterEntry.name}*!\nYour account is active.`,
+            [{ id: "menu", title: "📋 Main Menu" }]
+          )
+        );
+        await showMainMenu(fromPhone, newStudent);
+      }
     }
     return;
   }
