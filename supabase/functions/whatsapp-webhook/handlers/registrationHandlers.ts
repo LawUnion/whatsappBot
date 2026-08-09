@@ -29,7 +29,7 @@ export async function resetAndStartRegistration(fromPhone: string, contactName: 
     fromPhone,
     "",
     buildWhatsAppQuickReplies(
-      `👋 *Welcome to Law Faculty Bot!*\n\nTo access the bot, you need to verify your identity.\n\n📝 Please enter your *Form Number*:\n\n_Example: DUPG0000187_`,
+      `👋 *Welcome to Court Kachahri Bot!*\n\nTo access the bot, you need to verify your identity.\n\n📝 Please enter your *Form Number*:\n\n_Example: DUPG0000187_`,
       [{ id: "reset", title: "🔄 Reset / Restart" }]
     )
   );
@@ -282,14 +282,14 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
       );
     } else {
       if (!newStudent.college_id || !newStudent.semester_id || !newStudent.section_id) {
-        const customIntro = `🎉 *Registration Successful!*\n\nWelcome to Law Connect, *${rosterEntry.name}*!\n\nTo serve you better and provide accurate timetables and materials, we need to quickly update your profile.`;
+        const customIntro = `🎉 *Registration Successful!*\n\nWelcome to Court Kachahri Bot, *${rosterEntry.name}*!\n\nTo serve you better and provide accurate timetables and materials, we need to quickly update your profile.`;
         await startProfileCompletion(fromPhone, newStudent, customIntro);
       } else {
         await sendWhatsAppMessage(
           fromPhone,
           "",
           buildWhatsAppQuickReplies(
-            `🎉 *Registration Successful!*\n\nWelcome to Law Connect, *${rosterEntry.name}*!\nYour account is active.`,
+            `🎉 *Registration Successful!*\n\nWelcome to Court Kachahri Bot, *${rosterEntry.name}*!\nYour account is active.`,
             [{ id: "menu", title: "📋 Main Menu" }]
           )
         );

@@ -4,7 +4,7 @@ import { LoaderProvider } from '@/contexts/LoaderContext';
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Law Connect Bot | Admin Panel",
+  title: "Court Kachahri Bot | Admin Panel",
   description: "Telegram Admin Panel for Faculty of Law",
 };
 

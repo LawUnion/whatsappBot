@@ -1,4 +1,4 @@
-# Law Connect Bot - Telegram Admin Panel
+# Court Kachahri Bot - Telegram Admin Panel
 
 Production-ready Telegram bot admin panel for Faculty of Law with separate
 frontend and backend architecture.

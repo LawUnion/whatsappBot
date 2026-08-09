@@ -175,7 +175,7 @@ bot.command("start", async (ctx) => {
   );
 
   await ctx.reply(
-    "👋 <b>Welcome to Law Faculty Bot!</b>\n\n" +
+    "👋 <b>Welcome to Court Kachahri Bot!</b>\n\n" +
       "To access the bot, you need to verify your identity.\n\n" +
       "📝 Please enter your <b>University Roll Number</b>:\n\n" +
       "<i>Example: 123456</i>",

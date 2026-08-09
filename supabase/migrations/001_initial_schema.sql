@@ -1,4 +1,4 @@
--- Initial Database Schema for Law Connect Bot
+-- Initial Database Schema for Court Kachahri Bot
 -- Creates all tables for the Faculty of Law admin panel
 
 -- =====================================================

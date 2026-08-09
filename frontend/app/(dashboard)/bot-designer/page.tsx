@@ -294,7 +294,7 @@ export default function BotDesignerPage() {
                 </div>
                 <div>
                   <span className="text-sm font-semibold text-white">
-                    Law Faculty Bot
+                    Court Kachahri Bot
                   </span>
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
@@ -370,7 +370,7 @@ export default function BotDesignerPage() {
                 </div>
                 <div>
                   <span className="text-[15px] font-semibold text-[#e9edef]">
-                    Law Faculty Bot
+                    Court Kachahri Bot
                   </span>
                 </div>
               </div>
@@ -379,9 +379,9 @@ export default function BotDesignerPage() {
               <div className="flex-1 p-3 relative overflow-hidden bg-[#0b141a]">
                 {/* Chat Bubble (Menu Prompt) */}
                 <div className="bg-[#202c33] rounded-lg p-2 max-w-[90%] text-white text-sm shadow-sm relative mb-4">
-                  <div className="font-bold text-emerald-400 mb-1">Law Faculty Menu</div>
+                  <div className="font-bold text-emerald-400 mb-1">Court Kachahri Menu</div>
                   <p className="text-[#e9edef] mb-2 leading-snug">Select a module below to explore class timetables, notices, study materials, societies, and more:</p>
-                  <div className="text-[11px] text-[#8696a0] mb-2 mt-1">Law Connect Bot</div>
+                  <div className="text-[11px] text-[#8696a0] mb-2 mt-1">Court Kachahri Bot</div>
                   <div className="border-t border-[#313d45] pt-2 mt-1 text-center text-[#53bdeb] font-semibold flex justify-center items-center gap-2">
                     <span className="text-lg leading-none">☰</span> Main Menu
                   </div>

@@ -150,13 +150,13 @@ export function buildWhatsAppMenu(buttons: any[], sectionTitle = "Choose an opti
     type: "list",
     header: {
       type: "text",
-      text: "Law Faculty Menu",
+      text: "Court Kachahri Menu",
     },
     body: {
       text: "Select a module below to explore class timetables, notices, study materials, societies, and more:",
     },
     footer: {
-      text: "Law Connect Bot",
+      text: "Court Kachahri Bot",
     },
     action: {
       button: "Main Menu",
@@ -184,7 +184,7 @@ export function buildWhatsAppQuickReplies(
   const interactive: any = {
     type: "button",
     body: { text: formattedBody.substring(0, 1024) },
-    footer: { text: "Law Connect Bot" },
+    footer: { text: "Court Kachahri Bot" },
     action: {
       buttons: buttons.slice(0, 3).map((b) => ({
         type: "reply",

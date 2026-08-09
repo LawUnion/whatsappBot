@@ -57,7 +57,7 @@ export default function LoginPage() {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-slate-900">
-              Law Faculty Admin
+              Court Kachahri Admin
             </CardTitle>
             {/* <CardDescription className="text-slate-500 mt-2">
               Sign in to manage your Telegram bot

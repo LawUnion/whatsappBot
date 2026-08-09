@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       message =
         '🎉 <b>Registration Approved!</b>\n\n' +
         'Great news! Your registration has been approved.\n\n' +
-        'You now have full access to the Law Faculty Bot.\n' +
+        'You now have full access to the Court Kachahri Bot.\n' +
         'Use /start to access the menu and explore all features.\n\n' +
         '📚 <b>Available Features:</b>\n' +
         '• Class Schedule & Notes\n' +
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
         'Welcome to the community! 🎓';
 
       waMessage =
-        '🎉 *Registration Approved!*\n\nGreat news! Your registration has been approved.\nYou now have full access to the Law Faculty Bot.\nType /start or "Menu" to access all features:\n\n📚 *Available Features:*\n• Class Schedule & Notes\n• Important Notices\n• Study Materials\n• Events & Internships\n• Societies & Seniors Connect\n\nWelcome to the community! 🎓';
+        '🎉 *Registration Approved!*\n\nGreat news! Your registration has been approved.\nYou now have full access to the Court Kachahri Bot.\nType /start or "Menu" to access all features:\n\n📚 *Available Features:*\n• Class Schedule & Notes\n• Important Notices\n• Study Materials\n• Events & Internships\n• Societies & Seniors Connect\n\nWelcome to the community! 🎓';
     } else if (action === 'rejected') {
       message =
         '❌ <b>Registration Not Approved</b>\n\n' +

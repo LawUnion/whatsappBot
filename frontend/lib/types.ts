@@ -1,4 +1,4 @@
-// TypeScript types for the Law Connect Bot application
+// TypeScript types for the Court Kachahri Bot application
 
 // =====================================================
 // ADMIN ROLES
