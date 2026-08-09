@@ -78,18 +78,23 @@ export async function startProfileCompletion(fromPhone: string, student: any, cu
 }
 
 // Handles Registration Flow for new students or users in a registration session
-export async function handleRegistrationFlow(fromPhone: string, contactName: string, text: string, textLower: string) {
-  if (textLower === "/start" || textLower === "start" || textLower === "hi" || textLower === "hello" || textLower === "hey") {
+export async function handleRegistrationFlow(fromPhone: string, contactName: string, text: string, textLower: string, existingSession?: any) {
+  // Check if they want to reset or start
+  if (textLower === "/start" || textLower === "start" || textLower === "hi" || textLower === "hello" || textLower === "hey" || textLower === "/reset" || textLower === "reset") {
     await resetAndStartRegistration(fromPhone, contactName);
     return;
   }
 
-  // Check registration session
-  const { data: session } = await supabase
-    .from("registration_sessions")
-    .select("*")
-    .eq("whatsapp_id", fromPhone)
-    .single();
+  // Use passed session if available, otherwise fetch
+  let session = existingSession;
+  if (!session) {
+    const { data: fetchedSession } = await supabase
+      .from("registration_sessions")
+      .select("*")
+      .eq("whatsapp_id", fromPhone)
+      .maybeSingle();
+    session = fetchedSession;
+  }
 
   if (session && session.step === "awaiting_form_number") {
     const formNumber = text.trim().toUpperCase();

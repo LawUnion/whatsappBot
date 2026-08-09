@@ -126,14 +126,20 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
     return;
   }
 
-  // Fetch student and bot buttons in parallel to save DB roundtrips (reduces 3-4s delay)
+  // Fetch student, session, and bot buttons in parallel to save DB roundtrips (reduces latency by 200-400ms)
   const [
     { data: student },
+    { data: session },
     { data: buttons }
   ] = await Promise.all([
     supabase
       .from("students")
       .select("*, college:colleges(name), section:sections(name), roster:student_roster!roster_id(section_name)")
+      .eq("whatsapp_id", fromPhone)
+      .maybeSingle(),
+    supabase
+      .from("registration_sessions")
+      .select("*")
       .eq("whatsapp_id", fromPhone)
       .maybeSingle(),
     supabase.from("bot_buttons").select("*").eq("active", true)
@@ -143,11 +149,6 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
   if (student) {
     // If student is missing essential profile details, trigger profile completion
     if (!student.college_id || !student.semester_id || !student.section_id) {
-      const { data: session } = await supabase
-        .from("registration_sessions")
-        .select("*")
-        .eq("whatsapp_id", fromPhone)
-        .maybeSingle();
 
       if (session && session.step.startsWith("awaiting_profile_")) {
         await handleRegistrationFlow(fromPhone, contactName, text, textLower);
@@ -231,5 +232,5 @@ async function processMessage(fromPhone: string, contactName: string, text: stri
   }
 
   // Handle Registration Flow (Student not found in students table)
-  await handleRegistrationFlow(fromPhone, contactName, text, textLower);
+  await handleRegistrationFlow(fromPhone, contactName, text, textLower, session);
 }
