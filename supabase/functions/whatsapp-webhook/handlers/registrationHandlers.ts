@@ -377,7 +377,7 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
       .eq("semester_number", semNumber)
       .maybeSingle();
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("registration_sessions")
       .update({ 
         step: "awaiting_section", 
@@ -385,6 +385,12 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
         semester_id: semObj?.id || null 
       })
       .eq("id", session.id);
+
+    if (updateError) {
+      console.error("Failed to update session:", updateError);
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Internal Error: ${updateError.message}. Did you run the database migration?`));
+      return;
+    }
 
     await sendWhatsAppMessage(
       fromPhone,
@@ -461,7 +467,14 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
     const { data: yearObj } = await supabase.from("years").select("*").eq("college_id", session.college_id).eq("year_number", yearNumber).maybeSingle();
     const { data: semObj } = await supabase.from("semesters").select("*").eq("year_id", yearObj?.id).eq("semester_number", semNumber).maybeSingle();
 
-    await supabase.from("registration_sessions").update({ step: "awaiting_profile_section", year_id: yearObj?.id || null, semester_id: semObj?.id || null }).eq("id", session.id);
+    const { error: updateError } = await supabase.from("registration_sessions").update({ step: "awaiting_profile_section", year_id: yearObj?.id || null, semester_id: semObj?.id || null }).eq("id", session.id);
+    
+    if (updateError) {
+      console.error("Failed to update session:", updateError);
+      await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`❌ Internal Error: ${updateError.message}. Did you run the database migration?`));
+      return;
+    }
+
     await sendWhatsAppMessage(fromPhone, "", buildWhatsAppQuickReplies(`Semester ${semNumber} selected.\n\nFinally, enter your current *Section* (Example: A, B, C...):`));
     return;
   }
