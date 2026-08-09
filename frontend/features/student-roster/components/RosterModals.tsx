@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -94,6 +95,10 @@ export function RosterModals({
   const filteredImportYears = years.filter(
     (y) => y.college_id.toString() === importCollegeId,
   );
+
+  const [previewMode, setPreviewMode] = useState<"all" | "duplicates">("all");
+  const duplicateData = importData.filter(row => existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number));
+  const dataToShow = previewMode === "duplicates" ? duplicateData : importData;
 
   return (
     <>
@@ -327,10 +332,31 @@ export function RosterModals({
               </div>
             </div>
             
-            <p className="text-sm text-slate-600">
-              Found {importData.length} entries to import. Review the data
-              below:
-            </p>
+            <div className="flex items-center justify-between mt-4 mb-2">
+              <p className="text-sm text-slate-600">
+                {previewMode === "all" ? `Found ${importData.length} entries to import.` : `Found ${duplicateData.length} existing entries.`} Review the data below:
+              </p>
+              {existingImportKeys.size > 0 && (
+                <div className="flex gap-2">
+                  <Button 
+                    variant={previewMode === "all" ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setPreviewMode("all")}
+                    className="h-8 text-xs"
+                  >
+                    All Entries ({importData.length})
+                  </Button>
+                  <Button 
+                    variant={previewMode === "duplicates" ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setPreviewMode("duplicates")}
+                    className={`h-8 text-xs ${previewMode === "duplicates" ? "bg-amber-500 hover:bg-amber-600" : "text-amber-600 border-amber-200 hover:bg-amber-50"}`}
+                  >
+                    Duplicates ({existingImportKeys.size})
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="max-h-[300px] overflow-y-auto border rounded-lg">
               <Table>
                 <TableHeader>
@@ -344,7 +370,7 @@ export function RosterModals({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {importData.slice(0, 10).map((row, idx) => {
+                  {dataToShow.slice(0, 10).map((row, idx) => {
                     const isExisting = existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
                     return (
                     <TableRow key={idx} className={isExisting ? "bg-amber-50/50" : ""}>
@@ -372,13 +398,20 @@ export function RosterModals({
                     </TableRow>
                     );
                   })}
-                  {importData.length > 10 && (
+                  {dataToShow.length > 10 && (
                     <TableRow>
                       <TableCell
                         colSpan={6}
                         className="text-center text-slate-500 text-sm"
                       >
-                        ...and {importData.length - 10} more entries
+                        ...and {dataToShow.length - 10} more entries
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {dataToShow.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-slate-500 text-sm py-4">
+                        No entries found.
                       </TableCell>
                     </TableRow>
                   )}
