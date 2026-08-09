@@ -160,6 +160,28 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
     }
 
     // Verification successful, register student
+    let final_section_id = rosterEntry.section_id;
+
+    if (!final_section_id && rosterEntry.section_name && rosterEntry.year_id) {
+      // Find the correct section_id by matching section_name and year_id
+      const { data: matchedSection } = await supabase
+        .from("sections")
+        .select("id, semesters!inner(year_id)")
+        .eq("name", rosterEntry.section_name.toUpperCase())
+        .eq("semesters.year_id", rosterEntry.year_id)
+        .maybeSingle();
+
+      if (matchedSection) {
+        final_section_id = matchedSection.id;
+        
+        // Also optionally update the roster to cache the section_id for the future
+        await supabase
+          .from("student_roster")
+          .update({ section_id: final_section_id })
+          .eq("id", rosterEntry.id);
+      }
+    }
+
     const { data: newStudent, error: createError } = await supabase
       .from("students")
       .insert({
@@ -169,7 +191,7 @@ export async function handleRegistrationFlow(fromPhone: string, contactName: str
         roll_number: rosterEntry.roll_number,
         name: rosterEntry.name, // Using actual db column 'name' instead of 'student_name'
         college_id: rosterEntry.college_id,
-        section_id: rosterEntry.section_id,
+        section_id: final_section_id,
         roster_id: rosterEntry.id,
         status: rosterEntry.status || "Active",
       })

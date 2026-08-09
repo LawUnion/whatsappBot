@@ -1,4 +1,4 @@
-import { supabase, sendWhatsAppMessage, buildWhatsAppMenu, buildWhatsAppQuickReplies } from "../utils.ts";
+import { supabase, sendWhatsAppMessage, sendWhatsAppMedia, buildWhatsAppMenu, buildWhatsAppQuickReplies } from "../utils.ts";
 
 // Show Main Menu using WhatsApp Interactive List
 export async function showMainMenu(fromPhone: string, student: any) {
@@ -136,8 +136,13 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         await sendWhatsAppMessage(fromPhone, `⏰ *Class Timetables*`);
         
         for (const t of timetables) {
-          const text = `📅 *${t.title}*\n\n${t.notes ? `${t.notes}\n\n` : ""}🔗 View Timetable: ${t.file_url || "Contact Admin"}`;
-          await sendWhatsAppMessage(fromPhone, text.trim());
+          const text = `📅 *${t.title}*\n\n${t.notes ? `${t.notes}` : ""}`.trim();
+          
+          if (t.file_url) {
+            await sendWhatsAppMedia(fromPhone, t.file_url, text);
+          } else {
+            await sendWhatsAppMessage(fromPhone, text);
+          }
         }
 
         await sendWhatsAppMessage(
@@ -175,8 +180,13 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         await sendWhatsAppMessage(fromPhone, `📚 *Study Materials & Notes*`);
         
         for (const m of materials) {
-          const text = `📖 *${m.topic || m.subject}* (${m.subject || "General"})\n\n${m.description ? `${m.description}\n\n` : ""}🔗 Download: ${m.file_url || "N/A"}`;
-          await sendWhatsAppMessage(fromPhone, text.trim());
+          const text = `📖 *${m.topic || m.subject}* (${m.subject || "General"})\n\n${m.description ? `${m.description}` : ""}`.trim();
+          
+          if (m.file_url) {
+            await sendWhatsAppMedia(fromPhone, m.file_url, text);
+          } else {
+            await sendWhatsAppMessage(fromPhone, text);
+          }
         }
 
         await sendWhatsAppMessage(
@@ -231,8 +241,13 @@ export async function handleModuleClick(fromPhone: string, student: any, button:
         await sendWhatsAppMessage(fromPhone, `💼 *Latest Internships*`);
         
         for (const i of internships) {
-          const text = `💼 *${i.title || "Internship Opportunity"}*\n🏢 Info: ${i.info ? i.info : "No additional details"}\n🔗 Apply: ${i.apply_url || i.file_url || "Check portal"}`;
-          await sendWhatsAppMessage(fromPhone, text.trim());
+          const text = `💼 *${i.title || "Internship Opportunity"}*\n🏢 Info: ${i.info ? i.info : "No additional details"}${i.apply_url ? `\n🔗 Apply: ${i.apply_url}` : ""}`;
+          
+          if (i.file_url) {
+            await sendWhatsAppMedia(fromPhone, i.file_url, text.trim());
+          } else {
+            await sendWhatsAppMessage(fromPhone, text.trim());
+          }
         }
 
         await sendWhatsAppMessage(

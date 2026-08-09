@@ -76,6 +76,67 @@ export async function sendWhatsAppMessage(
   }
 }
 
+// Helper function to send WhatsApp media message (image/document)
+export async function sendWhatsAppMedia(
+  toPhone: string,
+  mediaUrl: string,
+  caption?: string
+): Promise<boolean> {
+  const config = await getWhatsAppConfig();
+  if (!config.phoneNumberId || !config.accessToken) {
+    console.error("WhatsApp configuration missing (phone_number_id or access_token)");
+    return false;
+  }
+
+  // Determine media type based on extension in URL
+  const isImage = mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) != null;
+  const mediaType = isImage ? "image" : "document";
+
+  const url = `https://graph.facebook.com/v21.0/${config.phoneNumberId}/messages`;
+  let payload: any = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: toPhone,
+    type: mediaType,
+  };
+
+  const formattedCaption = caption
+    ? caption
+        .replace(/<b>(.*?)<\/b>/g, "*$1*")
+        .replace(/<i>(.*?)<\/i>/g, "_$1_")
+        .replace(/<code>(.*?)<\/code>/g, "`$1`")
+    : undefined;
+
+  payload[mediaType] = {
+    link: mediaUrl,
+  };
+
+  if (formattedCaption) {
+    payload[mediaType].caption = formattedCaption;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${config.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      console.error(`WhatsApp API ${mediaType} Error:`, JSON.stringify(result));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(`Network error sending WhatsApp ${mediaType}:`, err);
+    return false;
+  }
+}
+
 // Build WhatsApp Interactive List Menu from bot_buttons
 export function buildWhatsAppMenu(buttons: any[], sectionTitle = "Choose an option") {
   // WhatsApp lists support max 10 rows per section
