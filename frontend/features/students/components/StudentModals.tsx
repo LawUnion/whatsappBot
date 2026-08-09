@@ -23,7 +23,11 @@ interface StudentModalsProps {
   
   processing: boolean;
   colleges: any[];
+  years: any[];
+  semesters: any[];
+  sections: any[];
   filteredYears: any[];
+  filteredSemesters: any[];
   filteredSections: any[];
 }
 
@@ -44,7 +48,11 @@ export function StudentModals({
   
   processing,
   colleges,
+  years,
+  semesters,
+  sections,
   filteredYears,
+  filteredSemesters,
   filteredSections,
 }: StudentModalsProps) {
   return (
@@ -136,7 +144,7 @@ export function StudentModals({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>College</Label>
                 <Select
@@ -146,6 +154,7 @@ export function StudentModals({
                       ...editFormData,
                       college_id: v === "__none__" ? "" : v,
                       year_id: "",
+                      semester_id: "",
                       section_id: "",
                     })
                   }
@@ -171,6 +180,7 @@ export function StudentModals({
                     setEditFormData({
                       ...editFormData,
                       year_id: v === "__none__" ? "" : v,
+                      semester_id: "",
                       section_id: "",
                     })
                   }
@@ -190,6 +200,32 @@ export function StudentModals({
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label>Semester</Label>
+                <Select
+                  value={editFormData.semester_id || "__none__"}
+                  onValueChange={(v) =>
+                    setEditFormData({
+                      ...editFormData,
+                      semester_id: v === "__none__" ? "" : v,
+                      section_id: "",
+                    })
+                  }
+                  disabled={!editFormData.year_id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">None</SelectItem>
+                    {filteredSemesters.map((s) => (
+                      <SelectItem key={s.id} value={s.id.toString()}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Section</Label>
                 <Select
                   value={editFormData.section_id || "__none__"}
@@ -199,7 +235,7 @@ export function StudentModals({
                       section_id: v === "__none__" ? "" : v,
                     })
                   }
-                  disabled={!editFormData.year_id}
+                  disabled={!editFormData.semester_id}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />

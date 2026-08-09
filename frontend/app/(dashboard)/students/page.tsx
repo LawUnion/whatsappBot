@@ -48,6 +48,7 @@ export default function StudentsPage() {
     roll_number: "",
     college_id: "",
     year_id: "",
+    semester_id: "",
     section_id: "",
   });
 
@@ -160,12 +161,23 @@ export default function StudentsPage() {
 
   const openEditModal = (student: Student) => {
     setEditingStudent(student);
+    
+    // Find semester_id from section_id if not present on student
+    let initialSemesterId = (student as any).semester_id?.toString() || "";
+    if (!initialSemesterId && student.section_id) {
+      const sec = sections.find(s => s.id === student.section_id);
+      if (sec && sec.semester_id) {
+        initialSemesterId = sec.semester_id.toString();
+      }
+    }
+
     setEditFormData({
       name: student.name || "",
       form_number: student.form_number || "",
       roll_number: student.roll_number || "",
       college_id: student.college_id ? student.college_id.toString() : "",
       year_id: student.year_id ? student.year_id.toString() : "",
+      semester_id: initialSemesterId,
       section_id: student.section_id ? student.section_id.toString() : "",
     });
     setShowEditModal(true);
@@ -233,11 +245,12 @@ export default function StudentsPage() {
     ? years.filter((y) => y.college_id === parseInt(editFormData.college_id))
     : years;
 
-  const filteredSections = editFormData.year_id
-    ? sections.filter((s) => {
-        const year = years.find((y) => y.id === parseInt(editFormData.year_id));
-        return year ? true : true;
-      })
+  const filteredSemesters = editFormData.year_id
+    ? semesters.filter((s) => s.year_id === parseInt(editFormData.year_id))
+    : semesters;
+
+  const filteredSections = editFormData.semester_id
+    ? sections.filter((s) => s.semester_id === parseInt(editFormData.semester_id))
     : sections;
 
   const total = students.length;
@@ -342,7 +355,11 @@ export default function StudentsPage() {
         handleUpdateStudent={handleUpdateStudent}
         processing={processing}
         colleges={colleges}
+        years={years}
+        semesters={semesters}
+        sections={sections}
         filteredYears={filteredYears}
+        filteredSemesters={filteredSemesters}
         filteredSections={filteredSections}
       />
     </div>

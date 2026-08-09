@@ -20,6 +20,7 @@ export function useStudents() {
   const [loading, setLoading] = useState(true);
   const [colleges, setColleges] = useState<any[]>([]);
   const [years, setYears] = useState<any[]>([]);
+  const [semesters, setSemesters] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,16 +54,18 @@ export function useStudents() {
       studentsQuery = studentsQuery.eq("college_id", adminCollegeId);
     }
 
-    const [studentsRes, collegesRes, yearsRes, sectionsRes] = await Promise.all([
+    const [studentsRes, collegesRes, yearsRes, semestersRes, sectionsRes] = await Promise.all([
       studentsQuery,
       supabase.from("colleges").select("*"),
       supabase.from("years").select("*"),
+      supabase.from("semesters").select("*"),
       supabase.from("sections").select("*"),
     ]);
 
     if (studentsRes.data) setStudents(studentsRes.data);
     if (collegesRes.data) setColleges(collegesRes.data);
     if (yearsRes.data) setYears(yearsRes.data);
+    if (semestersRes.data) setSemesters(semestersRes.data);
     if (sectionsRes.data) setSections(sectionsRes.data);
     setLoading(false);
   }, [adminCollegeId, adminSectionId, adminYearId, supabase]);
@@ -134,6 +137,7 @@ export function useStudents() {
     colleges,
     scopedColleges,
     years,
+    semesters,
     sections,
     searchQuery,
     setSearchQuery,
