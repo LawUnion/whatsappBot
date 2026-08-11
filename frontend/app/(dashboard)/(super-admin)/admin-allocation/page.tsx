@@ -404,15 +404,34 @@ export default function AdminAllocationPage() {
     )
       return;
 
-    const { error } = await supabase
-      .from("admins")
-      .delete()
-      .eq("id", admin.id);
-
-    if (error) {
-      alert("Error deleting admin: " + error.message);
-    } else {
-      fetchData();
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      if (!token) {
+        alert("Not authenticated");
+        return;
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/delete-admin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ targetAdminId: admin.id }),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        alert("Error deleting admin: " + (result.error || "Unknown error"));
+      } else {
+        fetchData();
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Network or server error while deleting admin. Please make sure the delete-admin edge function is deployed.");
     }
   };
 
