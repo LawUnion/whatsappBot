@@ -95,7 +95,7 @@ export default function EventsPage() {
     const [eventsRes, typesRes, collegesRes] = await Promise.all([
       supabase
         .from("events")
-        .select("*, event_type:event_types(name, icon), college:colleges(name), admin:admins!created_by(name)")
+        .select("*, event_type:event_types(name, icon), admin:admins!created_by(name)")
         .order("event_date", { ascending: true }),
       supabase.from("event_types").select("*"),
       supabase.from("colleges").select("*"),
