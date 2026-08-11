@@ -289,6 +289,7 @@ export default function AdminAllocationPage() {
         hideLoader();
         return;
       }
+      hideLoader();
     } else {
       // Create new admin via edge function (creates auth user + admin record)
       const { data: sessionData } = await supabase.auth.getSession();
@@ -341,6 +342,7 @@ export default function AdminAllocationPage() {
     fetchData();
     resetForm();
     setIsSubmitting(false);
+    hideLoader();
   };
 
   const handleResetPassword = async () => {
