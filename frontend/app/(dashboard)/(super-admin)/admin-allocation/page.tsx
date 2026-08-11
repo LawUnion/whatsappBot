@@ -300,32 +300,40 @@ export default function AdminAllocationPage() {
         return;
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create-admin`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create-admin`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
           },
-          body: JSON.stringify(payload),
-        },
-      );
+        );
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        alert("Error creating admin: " + (result.error || "Unknown error"));
+        if (!response.ok) {
+          alert("Error creating admin: " + (result.error || "Unknown error"));
+          setIsSubmitting(false);
+          hideLoader();
+          return;
+        }
+
+        setGeneratedCredentials({
+          email: newEmail,
+          password: result.tempPassword,
+        });
+        setShowCredentialsModal(true);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Network or server error while creating admin. Please make sure the create-admin edge function is deployed.");
         setIsSubmitting(false);
         hideLoader();
         return;
       }
-
-      setGeneratedCredentials({
-        email: newEmail,
-        password: result.tempPassword,
-      });
-      setShowCredentialsModal(true);
     }
 
     setShowCreateModal(false);

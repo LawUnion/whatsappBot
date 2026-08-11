@@ -108,51 +108,6 @@ const navSections: NavSection[] = [
       },
     ],
   },
-      {
-        title: "Notices",
-        href: "/notices",
-        icon: Megaphone,
-        roles: [
-          AdminRole.SUPER_ADMIN,
-          AdminRole.NOTICES_ADMIN,
-          AdminRole.COLLEGE_CONTENT_ADMIN,
-        ],
-      },
-      {
-        title: "Societies",
-        href: "/societies",
-        icon: Building,
-        roles: [AdminRole.SUPER_ADMIN, AdminRole.SOCIETIES_ADMIN],
-      },
-      {
-        title: "Study Materials",
-        href: "/study-materials",
-        icon: BookOpen,
-        roles: [
-          AdminRole.SUPER_ADMIN,
-          AdminRole.STUDY_MATERIAL_ADMIN,
-          AdminRole.SECTION_ADMIN,
-        ],
-      },
-      {
-        title: "Events",
-        href: "/events",
-        icon: Theater,
-        roles: [
-          AdminRole.SUPER_ADMIN,
-          AdminRole.EVENTS_ADMIN,
-          AdminRole.SOCIETIES_ADMIN,
-          AdminRole.COLLEGE_CONTENT_ADMIN,
-        ],
-      },
-      {
-        title: "Internships",
-        href: "/internships",
-        icon: Briefcase,
-        roles: [AdminRole.SUPER_ADMIN, AdminRole.INTERNSHIP_ADMIN, AdminRole.COLLEGE_CONTENT_ADMIN],
-      },
-    ],
-  },
   {
     label: "COMMUNICATION",
     items: [
