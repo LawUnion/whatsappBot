@@ -37,6 +37,7 @@ interface Admin {
   name: string;
   email: string;
   role: AdminRole;
+  allocated_modules?: string[];
   active: boolean;
   first_login: boolean;
   college_id?: number;
