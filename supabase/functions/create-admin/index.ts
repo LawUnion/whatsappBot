@@ -59,7 +59,7 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { name, email, role, college_id, year_id, section_id, society_id } = await req.json();
+    const { name, email, role, allocated_modules, college_id, year_id, section_id, society_id } = await req.json();
 
     if (!name || !email || !role) {
       return new Response(
@@ -93,6 +93,7 @@ serve(async (req) => {
       name,
       email,
       role,
+      allocated_modules: allocated_modules || [],
       college_id: college_id || null,
       year_id: year_id || null,
       section_id: section_id || null,

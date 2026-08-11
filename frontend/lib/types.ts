@@ -13,6 +13,7 @@ export enum AdminRole {
   STUDY_MATERIAL_ADMIN = "STUDY_MATERIAL_ADMIN",
   EVENTS_ADMIN = "EVENTS_ADMIN",
   INTERNSHIP_ADMIN = "INTERNSHIP_ADMIN",
+  SUB_ADMIN = "SUB_ADMIN",
 }
 
 export enum TargetLevel {
@@ -104,6 +105,7 @@ export interface Admin {
   name: string;
   email: string;
   role: AdminRole;
+  allocated_modules?: string[];
   college_id?: number;
   year_id?: number;
   section_id?: number;

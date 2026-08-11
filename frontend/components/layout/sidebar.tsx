@@ -23,6 +23,7 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   roles?: AdminRole[];
+  moduleId?: string;
 }
 
 interface NavSection {
@@ -73,8 +74,40 @@ const navSections: NavSection[] = [
         title: "Class Timetable",
         href: "/class-schedule",
         icon: Calendar,
-        roles: [AdminRole.SUPER_ADMIN, AdminRole.SECTION_ADMIN],
+        moduleId: "class_schedule",
       },
+      {
+        title: "Notices",
+        href: "/notices",
+        icon: Megaphone,
+        moduleId: "notices",
+      },
+      {
+        title: "Societies",
+        href: "/societies",
+        icon: Building,
+        moduleId: "societies",
+      },
+      {
+        title: "Study Materials",
+        href: "/study-materials",
+        icon: BookOpen,
+        moduleId: "study_materials",
+      },
+      {
+        title: "Events",
+        href: "/events",
+        icon: Theater,
+        moduleId: "events",
+      },
+      {
+        title: "Internships",
+        href: "/internships",
+        icon: Briefcase,
+        moduleId: "internships",
+      },
+    ],
+  },
       {
         title: "Notices",
         href: "/notices",
@@ -180,6 +213,7 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
 
     return navSections
       .filter((section) => {
+        // Master Admin / Structure / Communication require SUPER_ADMIN
         if (section.roles && !section.roles.includes(admin.role)) {
           return false;
         }
@@ -188,8 +222,17 @@ export function Sidebar({ admin, collapsed = false }: SidebarProps) {
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
-          if (!item.roles) return true;
-          return item.roles.includes(admin.role);
+          // If item specifically requires a role, check it
+          if (item.roles && !item.roles.includes(admin.role)) return false;
+          
+          // If it requires a module, check if admin is SUPER_ADMIN or has the module
+          if (item.moduleId) {
+            if (admin.role === AdminRole.SUPER_ADMIN) return true;
+            if (!admin.allocated_modules) return false;
+            return admin.allocated_modules.includes(item.moduleId);
+          }
+          
+          return true;
         }),
       }))
       .filter((section) => section.items.length > 0);
