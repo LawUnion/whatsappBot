@@ -1,0 +1,240 @@
+--- supabase/functions/whatsapp-webhook/handlers/registrationHandlers.ts
++++ supabase/functions/whatsapp-webhook/handlers/registrationHandlers.ts
+@@ -17,21 +17,21 @@
+     {
+       whatsapp_id: fromPhone,
+       telegram_first_name: contactName,
+-      step: "awaiting_form_number",
++      step: "awaiting_roll_number",
+       platform: "whatsapp",
+       attempts: 0,
+       updated_at: new Date().toISOString(),
+     },
+     { onConflict: "whatsapp_id" }
+   );
+ 
+   await sendWhatsAppMessage(
+     fromPhone,
+     "",
+     buildWhatsAppQuickReplies(
+-      `👋 *Welcome to Court Kachahri Bot!*\n\nTo access the bot, you need to verify your identity.\n\n📝 Please enter your *Form Number*:\n\n_Example: DUPG0000187_`,
++      `👋 *Welcome to Court Kachahri Bot!*\n\nTo access the bot, you need to verify your identity.\n\n📝 Please enter your *Roll Number*:\n\n_Example: 264001_`,
+       [{ id: "reset", title: "🔄 Reset / Restart" }]
+     )
+   );
+ }
+ 
+@@ -86,134 +86,72 @@
+     session = fetchedSession;
+   }
+ 
+-  if (session && session.step === "awaiting_form_number") {
+-    const formNumber = text.trim().toUpperCase();
+-    if (formNumber.length < 5 || formNumber.length > 30) {
++  if (session && session.step === "awaiting_roll_number") {
++    const rollNumber = text.trim().toUpperCase();
++    if (rollNumber.length < 3 || rollNumber.length > 20) {
+       await sendWhatsAppMessage(
+         fromPhone,
+         "",
+-        buildWhatsAppQuickReplies(`❌ Invalid form number format. Please enter a valid form number:`, [{ id: "reset", title: "🔄 Reset / Restart" }])
++        buildWhatsAppQuickReplies(`❌ Invalid roll number format. Please enter a valid roll number:`, [{ id: "reset", title: "🔄 Reset / Restart" }])
+       );
+       return;
+     }
+ 
+-    // Check student_roster table by form_number
++    // Check student_roster table by roll_number
+     const { data: rosterEntry } = await supabase
+       .from("student_roster")
+       .select("*")
+-      .eq("form_number", formNumber)
++      .eq("roll_number", rollNumber)
+       .maybeSingle();
+ 
+     if (rosterEntry) {
+       if (rosterEntry.is_claimed) {
+         await sendWhatsAppMessage(
+           fromPhone,
+           "",
+           buildWhatsAppQuickReplies(
+-            `⚠️ *Form Number Already Registered*\n\nForm number *${formNumber}* has already been registered.\nIf this is your form number and you didn't register it, please contact support at *${BOT_ADMIN_CONTACT}*.`,
++            `⚠️ *Roll Number Already Registered*\n\nRoll number *${rollNumber}* has already been registered.\nIf this is your roll number and you didn't register it, please contact support at *${BOT_ADMIN_CONTACT}*.`,
+             [{ id: "reset", title: "🔄 Reset / Restart" }]
+           )
+         );
+         return;
+       }
+ 
+-      // Record found! Now ask for verification (Roll Number)
+-      await supabase
+-        .from("registration_sessions")
+-        .update({ step: "awaiting_verification_roll_number", form_number: formNumber })
+-        .eq("id", session.id);
+-
+-      await sendWhatsAppMessage(
+-        fromPhone,
+-        "",
+-        buildWhatsAppQuickReplies(
+-          `✅ Found your details!\n\nTo prove you are the real owner of this Form Number, please enter your *Roll Number* (e.g. 264001):`,
+-          [{ id: "reset", title: "🔄 Reset / Restart" }]
+-        )
+-      );
+-      return;
+-
+-    } else {
+-      // Form number not in roster -> start manual registration
+-      await supabase
+-        .from("registration_sessions")
+-        .update({ step: "awaiting_name", form_number: formNumber })
+-        .eq("id", session.id);
+-
+-      await sendWhatsAppMessage(
+-        fromPhone,
+-        "",
+-        buildWhatsAppQuickReplies(
+-          `❓ Form number *${formNumber}* not found in our official list.\n\nDon't worry! You can complete manual registration.\n\n📝 First, please enter your *Full Name*:`,
+-          [{ id: "reset", title: "🔄 Reset / Restart" }]
+-        )
+-      );
+-      return;
+-    }
+-  }
+-
+-  if (session && session.step === "awaiting_verification_roll_number") {
+-    const rollNumber = text.trim();
+-    
+-    // Fetch roster entry based on form_number stored in session
+-    const { data: rosterEntry } = await supabase
+-      .from("student_roster")
+-      .select("*")
+-      .eq("form_number", session.form_number)
+-      .maybeSingle();
+-
+-    if (!rosterEntry) {
+-      await resetAndStartRegistration(fromPhone, contactName);
+-      return;
+-    }
+-
+-    if (rosterEntry.roll_number !== rollNumber) {
+-      const newAttempts = (session.attempts || 0) + 1;
+-      
+-      if (newAttempts >= 3) {
+-        await supabase
+-          .from("registration_sessions")
+-          .update({ step: "blocked", attempts: newAttempts, updated_at: new Date().toISOString() })
+-          .eq("id", session.id);
+-          
+-        await sendWhatsAppMessage(
+-          fromPhone,
+-          "",
+-          buildWhatsAppQuickReplies(`🚫 *Maximum Attempts Reached*\n\nYou have entered an incorrect Roll Number too many times. Your registration is locked for 15 minutes to protect the account owner's privacy.`)
+-        );
+-      } else {
+-        await supabase
+-          .from("registration_sessions")
+-          .update({ attempts: newAttempts, updated_at: new Date().toISOString() })
+-          .eq("id", session.id);
+-          
+-        await sendWhatsAppMessage(
+-          fromPhone,
+-          "",
+-          buildWhatsAppQuickReplies(
+-            `❌ Incorrect Roll Number (Attempt ${newAttempts}/3).\n\nVerification failed. Please check your Roll Number and try again:`,
+-            [{ id: "reset", title: "🔄 Reset / Restart" }]
+-          )
+-        );
+-      }
+-      return;
+-    }
+-
+-    // Verification Success! Register the student
++      // Roll number found! Register the student immediately.
+       
+       // First, mark the roster entry as claimed
+       await supabase
+         .from("student_roster")
+         .update({ 
+           is_claimed: true, 
+           claimed_by: fromPhone,
+           claimed_at: new Date().toISOString() 
+         })
+         .eq("id", rosterEntry.id);
+ 
+       // Find section_id if available
+       let sectionId = null;
+       if (rosterEntry.section_name && rosterEntry.semester_id) {
+         const { data: section } = await supabase
+           .from("sections")
+           .select("id")
+           .eq("name", rosterEntry.section_name)
+           .eq("semester_id", rosterEntry.semester_id)
+           .maybeSingle();
+         if (section) sectionId = section.id;
+       }
+ 
+       // Create the student profile
+       const { data: newStudent, error: insertError } = await supabase
+         .from("students")
+         .insert({
+           whatsapp_id: fromPhone,
+           telegram_user_id: null,
+           whatsapp_name: contactName,
+           roll_number: rosterEntry.roll_number,
+           form_number: rosterEntry.form_number,
+           name: rosterEntry.name,
+           college_id: rosterEntry.college_id,
+           year_id: rosterEntry.year_id,
+           semester_id: rosterEntry.semester_id,
+           section_id: sectionId,
+           roster_id: rosterEntry.id,
+           status: "Active" // Auto-approve since they were in roster
+         })
+         .select("*, college:colleges(name)")
+         .single();
+ 
+       // Complete the session
+       await supabase.from("registration_sessions").update({ step: "completed" }).eq("id", session.id);
+ 
+       if (insertError) {
+         await sendWhatsAppMessage(fromPhone, `❌ Error creating account: ${insertError.message}`);
+         return;
+       }
+ 
+       // If missing details, trigger profile completion
+       if (!newStudent.college_id || !newStudent.semester_id || !newStudent.section_id) {
+         const customIntro = `🎉 *Registration Successful!*\n\nWelcome to Court Kachahri Bot, *${rosterEntry.name}*!\n\nTo serve you better and provide accurate timetables and materials, we need to quickly update your profile.`;
+         await startProfileCompletion(fromPhone, newStudent, customIntro);
+         return;
+       }
+ 
+       await sendWhatsAppMessage(
+         fromPhone,
+         "",
+         buildWhatsAppQuickReplies(
+           `🎉 *Registration Successful!*\n\nWelcome to Court Kachahri Bot, *${rosterEntry.name}*!\nYour account is active.`,
+           [{ id: "menu", title: "📋 Main Menu" }]
+         )
+       );
+       
+       await showMainMenu(fromPhone, newStudent);
+       return;
++
++    } else {
++      // Roll number not in roster -> start manual registration
++      await supabase
++        .from("registration_sessions")
++        .update({ step: "awaiting_name", roll_number: rollNumber })
++        .eq("id", session.id);
++
++      await sendWhatsAppMessage(
++        fromPhone,
++        "",
++        buildWhatsAppQuickReplies(
++          `❓ Roll number *${rollNumber}* not found in our official list.\n\nDon't worry! You can complete manual registration.\n\n📝 First, please enter your *Full Name*:`,
++          [{ id: "reset", title: "🔄 Reset / Restart" }]
++        )
++      );
++      return;
++    }
++  }
