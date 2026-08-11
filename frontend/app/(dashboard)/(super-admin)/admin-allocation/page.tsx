@@ -432,7 +432,6 @@ export default function AdminAllocationPage() {
       } else {
         fetchData();
       }
-      
     } catch (err) {
       console.error("Delete error:", err);
       alert("Network or server error while deleting admin. Please make sure the delete-admin edge function is deployed.");
