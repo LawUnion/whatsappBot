@@ -45,12 +45,13 @@ const navSections: NavSection[] = [
       { title: "Bot Settings", href: "/bot-settings", icon: Bot },
       { title: "Bot Designer", href: "/bot-designer", icon: Smartphone },
       { title: "Student Roster", href: "/student-roster", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "APPROVALS",
+    items: [
       { title: "Pending Approvals", href: "/students", icon: GraduationCap },
-      {
-        title: "Content Approvals",
-        href: "/content-approvals",
-        icon: CheckSquare,
-      },
+      { title: "Content Approvals", href: "/content-approvals", icon: CheckSquare },
     ],
   },
   {
