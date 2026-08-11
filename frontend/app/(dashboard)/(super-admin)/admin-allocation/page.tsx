@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1042,8 +1043,9 @@ export default function AdminAllocationPage() {
               <Button
                 onClick={handleCreate}
                 disabled={isSubmitting || !newName || !newEmail}
-                className="flex-1 bg-slate-900 hover:bg-slate-800"
+                className="flex-1 bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2"
               >
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isSubmitting
                   ? editingAdmin
                     ? "Updating..."

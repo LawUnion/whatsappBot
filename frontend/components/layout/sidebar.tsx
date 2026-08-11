@@ -45,17 +45,11 @@ const navSections: NavSection[] = [
       { title: "Bot Settings", href: "/bot-settings", icon: Bot },
       { title: "Bot Designer", href: "/bot-designer", icon: Smartphone },
       { title: "Student Roster", href: "/student-roster", icon: ClipboardList },
-      {
-        title: "Pending Approvals",
-        href: "/students",
-        icon: GraduationCap,
-        roles: [AdminRole.SUPER_ADMIN],
-      },
+      { title: "Pending Approvals", href: "/students", icon: GraduationCap },
       {
         title: "Content Approvals",
         href: "/content-approvals",
         icon: CheckSquare,
-        roles: [AdminRole.SUPER_ADMIN],
       },
     ],
   },
@@ -115,13 +109,11 @@ const navSections: NavSection[] = [
         title: "Push Broadcast",
         href: "/push-messages",
         icon: BellRing,
-        roles: [AdminRole.SUPER_ADMIN],
       },
       {
         title: "Support Inbox",
         href: "/support",
         icon: Mail,
-        roles: [AdminRole.SUPER_ADMIN],
       },
       {
         title: "Activity Logs",
