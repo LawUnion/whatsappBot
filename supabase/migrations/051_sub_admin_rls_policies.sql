@@ -176,10 +176,10 @@ CREATE POLICY "Admins can manage internships" ON internships FOR ALL TO authenti
 -- =====================
 -- CLASS SCHEDULE (timetable)
 -- =====================
-DROP POLICY IF EXISTS "Admins can view class schedules" ON class_schedule;
-DROP POLICY IF EXISTS "Admins can manage class schedules" ON class_schedule;
+DROP POLICY IF EXISTS "Admins can view class schedules" ON class_timetables;
+DROP POLICY IF EXISTS "Admins can manage class schedules" ON class_timetables;
 
-CREATE POLICY "Admins can view class schedules" ON class_schedule FOR SELECT TO authenticated USING (
+CREATE POLICY "Admins can view class schedules" ON class_timetables FOR SELECT TO authenticated USING (
   EXISTS (
     SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND (
       a.role = 'SUPER_ADMIN' OR a.role = 'SECTION_ADMIN' OR
@@ -187,7 +187,7 @@ CREATE POLICY "Admins can view class schedules" ON class_schedule FOR SELECT TO 
     )
   )
 );
-CREATE POLICY "Admins can manage class schedules" ON class_schedule FOR ALL TO authenticated USING (
+CREATE POLICY "Admins can manage class schedules" ON class_timetables FOR ALL TO authenticated USING (
   EXISTS (
     SELECT 1 FROM admins a WHERE a.id = auth.uid() AND a.active = TRUE AND (
       a.role = 'SUPER_ADMIN' OR a.role = 'SECTION_ADMIN' OR
