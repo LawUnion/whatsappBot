@@ -370,30 +370,16 @@ export function RosterModals({
                     <TableHead>Form Number</TableHead>
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>College</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Semester</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>College Code</TableHead>
+                    <TableHead>Section</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {dataToShow.slice(0, displayLimit).map((row, idx) => {
                     const isExisting = previewMode === "duplicates" || existingImportKeys.has(row.form_number) || existingImportKeys.has(row.roll_number);
                     
-                    let rowCollegeName = "-";
-                    let rowYearName = "-";
-                    let rowSemesterName = "-";
-
-                    if (previewMode === "all") {
-                      rowCollegeName = row.college_code ? (colleges.find(c => c.code.toLowerCase() === row.college_code.toLowerCase())?.name || row.college_code) : selectedCollegeName;
-                      rowYearName = selectedYearName;
-                      rowSemesterName = selectedSemesterName;
-                    } else {
-                      rowCollegeName = colleges.find(c => c.id === row.college_id)?.name || "-";
-                      rowYearName = years.find(y => y.id === row.year_id)?.name || "-";
-                      const rowSection = sections.find(s => s.id === row.section_id);
-                      rowSemesterName = semesters.find(s => s.id === rowSection?.semester_id)?.name || "-";
-                    }
-
                     return (
                     <TableRow key={idx} className={isExisting ? "bg-amber-50/50" : ""}>
                       <TableCell className="font-mono text-xs whitespace-nowrap">
@@ -408,14 +394,17 @@ export function RosterModals({
                         )}
                       </TableCell>
                       <TableCell className="text-sm">{row.name}</TableCell>
-                      <TableCell className="text-sm text-slate-600 truncate max-w-[120px]" title={rowCollegeName}>
-                        {rowCollegeName}
+                      <TableCell className="text-sm text-slate-600 truncate max-w-[120px]" title={row.email || "-"}>
+                        {row.email || "-"}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">
-                        {rowYearName}
+                        {row.phone || "-"}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">
-                        {rowSemesterName}
+                        {row.college_code || "-"}
+                      </TableCell>
+                      <TableCell className="text-sm text-slate-600">
+                        {row.section_name || "-"}
                       </TableCell>
                     </TableRow>
                     );
