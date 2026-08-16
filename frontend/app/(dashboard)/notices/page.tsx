@@ -82,18 +82,21 @@ export default function NoticesPage() {
     setLoading(true);
     let query = supabase
       .from("notices")
-      .select("*, college:colleges(code, name), admin:admins(name)")
+      .select("*, admin:admins(name)")
       .order("created_at", { ascending: false });
-
-    // Filter by admin's college scope
-    if (adminCollegeId) {
-      query = query.or(`college_id.eq.${adminCollegeId},college_id.is.null`);
-    }
 
     const { data, error } = await query;
 
     if (!error && data) {
-      setNotices(data);
+      let filteredNotices = data;
+      // Filter by admin's college scope
+      if (adminCollegeId) {
+        filteredNotices = filteredNotices.filter((n: any) => {
+          if (!n.target_colleges || n.target_colleges.length === 0) return true;
+          return n.target_colleges.includes(adminCollegeId);
+        });
+      }
+      setNotices(filteredNotices);
     }
     setLoading(false);
   };

@@ -82,7 +82,7 @@ export default function StudyMaterialsPage() {
     const [materialsRes, collegesRes] = await Promise.all([
       supabase
         .from("study_materials")
-        .select("*, college:colleges(code, name), admin:admins(name)")
+        .select("*, admin:admins(name)")
         .order("created_at", { ascending: false }),
       supabase.from("colleges").select("*"),
     ]);
