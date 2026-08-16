@@ -55,7 +55,7 @@ interface NoticeData {
   id: string;
   title: string;
   file_url: string;
-  college_id: number | null;
+  target_colleges: number[] | null;
   created_at: string;
   admin?: { name: string } | { name: string }[] | null;
   college?: { code: string } | { code: string }[] | null;
@@ -99,13 +99,13 @@ export default function DocumentsPage() {
         supabase
           .from("notices")
           .select(
-            "id, title, file_url, college_id, created_at, admin:admins(name), college:colleges(code)",
+            "id, title, file_url, target_colleges, created_at, admin:admins(name)",
           )
           .not("file_url", "is", null),
         supabase
           .from("study_materials")
           .select(
-            "id, subject, topic, file_url, college_id, created_at, admin:admins(name), college:colleges(code)",
+            "id, subject, topic, file_url, target_colleges, created_at, admin:admins(name)",
           )
           .not("file_url", "is", null),
         supabase
@@ -128,7 +128,7 @@ export default function DocumentsPage() {
       return admin.name || "Unknown";
     };
 
-    // Helper to safely get code from college relation
+    // Helper to safely get code from college relation (for old models if any)
     const getCollegeCode = (
       college: { code: string } | { code: string }[] | null | undefined,
     ): string | null => {
@@ -137,6 +137,14 @@ export default function DocumentsPage() {
       return college.code || null;
     };
 
+    // Helper to map target_colleges array to comma separated codes
+    const getTargetCollegesCodes = (targetColleges: number[] | null | undefined): string | null => {
+      if (!targetColleges || targetColleges.length === 0) return "All";
+      const collegesList = collegesRes.data || [];
+      const codes = targetColleges.map((id: number) => collegesList.find((c: any) => c.id === id)?.code).filter(Boolean);
+      return codes.length > 0 ? codes.join(", ") : "All";
+    }
+
     // Add notices
     ((notices.data || []) as NoticeData[]).forEach((n) => {
       docs.push({
@@ -144,10 +152,10 @@ export default function DocumentsPage() {
         title: n.title,
         module: "Notices",
         file_url: n.file_url,
-        college_id: n.college_id,
+        college_id: n.target_colleges?.[0] || null, // fallback to first if any
         created_at: n.created_at,
         admin_name: getAdminName(n.admin),
-        college_code: getCollegeCode(n.college),
+        college_code: getTargetCollegesCodes(n.target_colleges),
       });
     });
 
@@ -158,10 +166,10 @@ export default function DocumentsPage() {
         title: m.topic || m.subject,
         module: "Study Material",
         file_url: m.file_url,
-        college_id: m.college_id,
+        college_id: m.target_colleges?.[0] || null, // fallback to first if any
         created_at: m.created_at,
         admin_name: getAdminName(m.admin),
-        college_code: getCollegeCode(m.college),
+        college_code: getTargetCollegesCodes(m.target_colleges),
       });
     });
 
