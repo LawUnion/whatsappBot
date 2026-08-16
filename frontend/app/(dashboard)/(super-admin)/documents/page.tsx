@@ -116,6 +116,17 @@ export default function DocumentsPage() {
         supabase.from("colleges").select("*"),
       ]);
 
+    if (notices.error) console.error("Notices fetch error:", notices.error);
+    if (studyMaterials.error) console.error("Study Materials fetch error:", studyMaterials.error);
+    if (scheduleNotes.error) console.error("Schedule Notes fetch error:", scheduleNotes.error);
+    
+    // Add toasts if there are errors so we can debug on frontend
+    if (notices.error || studyMaterials.error || scheduleNotes.error) {
+      toast.error(
+        `Fetch Error: N=${notices.error?.message || 'ok'} S=${studyMaterials.error?.message || 'ok'} SN=${scheduleNotes.error?.message || 'ok'}`
+      );
+    }
+
     const docs: DocumentFile[] = [];
 
     // Helper to safely get name from admin relation (can be object or array)
