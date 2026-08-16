@@ -66,10 +66,9 @@ interface StudyMaterialData {
   subject: string;
   topic: string;
   file_url: string;
-  college_id: number | null;
+  target_colleges: number[] | null;
   created_at: string;
   admin?: { name: string } | { name: string }[] | null;
-  college?: { code: string } | { code: string }[] | null;
 }
 
 interface ScheduleNoteData {
